@@ -1,0 +1,419 @@
+/**
+ * Observability Middleware
+ * 
+ * Automatic instrumentation for HTTP requests and database operations
+ * Integrates with the Advanced Monitoring & Observability Platform
+ */
+
+import { Request, Response, NextFunction } from 'express';
+import { observabilityPlatform } from '../services/observabilityPlatform';
+import { logger } from '../utils/logger';
+
+interface RequestWithTrace extends Request {
+  traceId?: string;
+  startTime?: number;
+}
+
+/**
+ * HTTP Request Instrumentation Middleware
+ */
+export const httpInstrumentationMiddleware = async (
+  req: RequestWithTrace,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const startTime = Date.now();
+  req.startTime = startTime;
+
+  // Start distributed trace
+  const traceId = await observabilityPlatform.startTrace('http_request', {
+    method: req.method,
+    url: req.url,
+    userAgent: req.get('User-Agent'),
+    ip: req.ip,
+    userId: (req as any).user?.id
+  });
+  
+  req.traceId = traceId;
+
+  // Record request metric
+  await observabilityPlatform.recordMetric({
+    name: 'http.requests',
+    value: 1,
+    unit: 'request',
+    timestamp: new Date(),
+    tags: {
+      method: req.method,
+      endpoint: req.route?.path || req.path,
+      status: 'started'
+    },
+    type: 'counter'
+  });
+
+  // Override res.end to capture response metrics
+  const originalEnd = res.end;
+  res.end = function(chunk?: any, encoding?: any) {
+    const duration = Date.now() - startTime;
+    
+    // Record completion metrics
+    observabilityPlatform.recordMetric({
+      name: 'http.response_time',
+      value: duration,
+      unit: 'ms',
+      timestamp: new Date(),
+      tags: {
+        method: req.method,
+        endpoint: req.route?.path || req.path,
+        status_code: res.statusCode.toString(),
+        status_class: `${Math.floor(res.statusCode / 100)}xx`
+      },
+      type: 'histogram'
+    });
+
+    // Record response size if available
+    const contentLength = res.get('Content-Length');
+    if (contentLength) {
+      observabilityPlatform.recordMetric({
+        name: 'http.response_size',
+        value: parseInt(contentLength),
+        unit: 'bytes',
+        timestamp: new Date(),
+        tags: {
+          method: req.method,
+          endpoint: req.route?.path || req.path
+        },
+        type: 'histogram'
+      });
+    }
+
+    // Finish distributed trace
+    const traceStatus = res.statusCode >= 400 ? 'error' : 'ok';
+    observabilityPlatform.finishTrace(traceId, traceStatus);
+
+    // Add trace log
+    observabilityPlatform.addTraceLog(traceId, {
+      timestamp: new Date(),
+      level: res.statusCode >= 400 ? 'error' : 'info',
+      message: `HTTP ${req.method} ${req.url} - ${res.statusCode}`,
+      fields: {
+        duration,
+        statusCode: res.statusCode,
+        contentLength: contentLength || 0
+      }
+    });
+
+    // Call original end
+    originalEnd.call(this, chunk, encoding);
+  };
+
+  next();
+};
+
+/**
+ * Error Instrumentation Middleware
+ */
+export const errorInstrumentationMiddleware = (
+  error: Error,
+  req: RequestWithTrace,
+  res: Response,
+  next: NextFunction
+): void => {
+  const duration = req.startTime ? Date.now() - req.startTime : 0;
+
+  // Record error metrics
+  observabilityPlatform.recordMetric({
+    name: 'http.errors',
+    value: 1,
+    unit: 'error',
+    timestamp: new Date(),
+    tags: {
+      method: req.method,
+      endpoint: req.route?.path || req.path,
+      error_type: error.name,
+      error_message: error.message
+    },
+    type: 'counter'
+  });
+
+  // Add error trace log
+  if (req.traceId) {
+    observabilityPlatform.addTraceLog(req.traceId, {
+      timestamp: new Date(),
+      level: 'error',
+      message: `Error: ${error.message}`,
+      fields: {
+        error_name: error.name,
+        error_stack: error.stack,
+        duration
+      }
+    });
+
+    // Finish trace with error status
+    observabilityPlatform.finishTrace(req.traceId, 'error');
+  }
+
+  logger.error('HTTP request error', {
+    method: req.method,
+    url: req.url,
+    error: error.message,
+    stack: error.stack,
+    traceId: req.traceId,
+    duration
+  });
+
+  next(error);
+};
+
+/**
+ * Database Query Instrumentation
+ */
+export const instrumentDatabaseQuery = async <T>(
+  operation: string,
+  query: string,
+  params: any[],
+  executor: () => Promise<T>
+): Promise<T> => {
+  const startTime = Date.now();
+  
+  // Start database trace
+  const traceId = await observabilityPlatform.startTrace('database_query', {
+    operation,
+    query: query.substring(0, 200), // Truncate long queries
+    paramCount: params.length
+  });
+
+  try {
+    const result = await executor();
+    const duration = Date.now() - startTime;
+
+    // Record success metrics
+    await observabilityPlatform.recordMetric({
+      name: 'database.query_time',
+      value: duration,
+      unit: 'ms',
+      timestamp: new Date(),
+      tags: {
+        operation,
+        status: 'success'
+      },
+      type: 'histogram'
+    });
+
+    await observabilityPlatform.recordMetric({
+      name: 'database.queries',
+      value: 1,
+      unit: 'query',
+      timestamp: new Date(),
+      tags: {
+        operation,
+        status: 'success'
+      },
+      type: 'counter'
+    });
+
+    // Add success trace log
+    await observabilityPlatform.addTraceLog(traceId, {
+      timestamp: new Date(),
+      level: 'info',
+      message: `Database query completed successfully`,
+      fields: {
+        duration,
+        operation,
+        rowCount: (result as any)?.rowCount || 'unknown'
+      }
+    });
+
+    await observabilityPlatform.finishTrace(traceId, 'ok');
+    return result;
+
+  } catch (error) {
+    const duration = Date.now() - startTime;
+
+    // Record error metrics
+    await observabilityPlatform.recordMetric({
+      name: 'database.query_time',
+      value: duration,
+      unit: 'ms',
+      timestamp: new Date(),
+      tags: {
+        operation,
+        status: 'error'
+      },
+      type: 'histogram'
+    });
+
+    await observabilityPlatform.recordMetric({
+      name: 'database.errors',
+      value: 1,
+      unit: 'error',
+      timestamp: new Date(),
+      tags: {
+        operation,
+        error_type: (error as Error).name
+      },
+      type: 'counter'
+    });
+
+    // Add error trace log
+    await observabilityPlatform.addTraceLog(traceId, {
+      timestamp: new Date(),
+      level: 'error',
+      message: `Database query failed: ${(error as Error).message}`,
+      fields: {
+        duration,
+        operation,
+        error_name: (error as Error).name,
+        error_message: (error as Error).message
+      }
+    });
+
+    await observabilityPlatform.finishTrace(traceId, 'error');
+    throw error;
+  }
+};
+
+/**
+ * Custom Business Logic Instrumentation
+ */
+export const instrumentBusinessOperation = async <T>(
+  operationName: string,
+  tags: Record<string, any>,
+  executor: (traceId: string) => Promise<T>
+): Promise<T> => {
+  const startTime = Date.now();
+  
+  // Start business operation trace
+  const traceId = await observabilityPlatform.startTrace(operationName, tags);
+
+  try {
+    const result = await executor(traceId);
+    const duration = Date.now() - startTime;
+
+    // Record success metrics
+    await observabilityPlatform.recordMetric({
+      name: `business.${operationName}.duration`,
+      value: duration,
+      unit: 'ms',
+      timestamp: new Date(),
+      tags: {
+        ...tags,
+        status: 'success'
+      },
+      type: 'histogram'
+    });
+
+    await observabilityPlatform.recordMetric({
+      name: `business.${operationName}.operations`,
+      value: 1,
+      unit: 'operation',
+      timestamp: new Date(),
+      tags: {
+        ...tags,
+        status: 'success'
+      },
+      type: 'counter'
+    });
+
+    await observabilityPlatform.finishTrace(traceId, 'ok');
+    return result;
+
+  } catch (error) {
+    const duration = Date.now() - startTime;
+
+    // Record error metrics
+    await observabilityPlatform.recordMetric({
+      name: `business.${operationName}.duration`,
+      value: duration,
+      unit: 'ms',
+      timestamp: new Date(),
+      tags: {
+        ...tags,
+        status: 'error'
+      },
+      type: 'histogram'
+    });
+
+    await observabilityPlatform.recordMetric({
+      name: `business.${operationName}.errors`,
+      value: 1,
+      unit: 'error',
+      timestamp: new Date(),
+      tags: {
+        ...tags,
+        error_type: (error as Error).name
+      },
+      type: 'counter'
+    });
+
+    await observabilityPlatform.finishTrace(traceId, 'error');
+    throw error;
+  }
+};
+
+/**
+ * System Health Check Instrumentation
+ */
+export const instrumentHealthCheck = async (
+  serviceName: string,
+  healthCheck: () => Promise<boolean>
+): Promise<boolean> => {
+  const startTime = Date.now();
+  
+  try {
+    const isHealthy = await healthCheck();
+    const duration = Date.now() - startTime;
+
+    await observabilityPlatform.recordMetric({
+      name: `health.${serviceName}.check_time`,
+      value: duration,
+      unit: 'ms',
+      timestamp: new Date(),
+      tags: {
+        service: serviceName,
+        status: isHealthy ? 'healthy' : 'unhealthy'
+      },
+      type: 'histogram'
+    });
+
+    await observabilityPlatform.recordMetric({
+      name: `health.${serviceName}.status`,
+      value: isHealthy ? 1 : 0,
+      unit: 'status',
+      timestamp: new Date(),
+      tags: {
+        service: serviceName
+      },
+      type: 'gauge'
+    });
+
+    return isHealthy;
+
+  } catch (error) {
+    const duration = Date.now() - startTime;
+
+    await observabilityPlatform.recordMetric({
+      name: `health.${serviceName}.check_time`,
+      value: duration,
+      unit: 'ms',
+      timestamp: new Date(),
+      tags: {
+        service: serviceName,
+        status: 'error'
+      },
+      type: 'histogram'
+    });
+
+    await observabilityPlatform.recordMetric({
+      name: `health.${serviceName}.status`,
+      value: 0,
+      unit: 'status',
+      timestamp: new Date(),
+      tags: {
+        service: serviceName
+      },
+      type: 'gauge'
+    });
+
+    throw error;
+  }
+};

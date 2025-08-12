@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Monitoring Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-online { background: #10b981; }
+        .status-warning { background: #f59e0b; }
+        .status-critical { background: #ef4444; }
+        .status-offline { background: #6b7280; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .metric-value.good { color: #10b981; }
+        .metric-value.warning { color: #f59e0b; }
+        .metric-value.critical { color: #ef4444; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-fill.good { background: #10b981; }
+        .progress-fill.warning { background: #f59e0b; }
+        .progress-fill.critical { background: #ef4444; }
+        
+        .control-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .control-panel h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .log-viewer {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .log-entry.error { color: #ef4444; }
+        .log-entry.warning { color: #f59e0b; }
+        .log-entry.info { color: #3b82f6; }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+        
+        .tab:hover {
+            color: #333;
+        }
+        
+        .tab.active {
+            color: #6366f1;
+            border-bottom-color: #6366f1;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .alert-item {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-item.warning {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+        }
+        
+        .alert-item.critical {
+            background: #fee2e2;
+            border: 1px solid #f87171;
+        }
+        
+        .alert-item.emergency {
+            background: #7f1d1d;
+            color: white;
+            border: 1px solid #991b1b;
+        }
+        
+        .timestamp {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span class="status-indicator status-online" id="systemStatus"></span>
+                System Monitoring Dashboard
+                <span class="timestamp" style="margin-left: auto; font-size: 14px; font-weight: normal;">
+                    Last updated: <span id="lastUpdate">--:--:--</span>
+                </span>
+            </h1>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="grid">
+            <!-- System Health -->
+            <div class="card">
+                <h2>🏥 System Health</h2>
+                <div class="metric">
+                    <span class="metric-label">Backend API</span>
+                    <span class="metric-value good" id="backendStatus">Online</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Frontend</span>
+                    <span class="metric-value good" id="frontendStatus">Online</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Database</span>
+                    <span class="metric-value good" id="dbStatus">Connected</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Monitoring</span>
+                    <span class="metric-value good" id="monitoringStatus">Active</span>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="card">
+                <h2>⚡ Performance</h2>
+                <div class="metric">
+                    <span class="metric-label">Response Time</span>
+                    <span class="metric-value good" id="responseTime">245ms</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Error Rate</span>
+                    <span class="metric-value good" id="errorRate">0.1%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Requests/min</span>
+                    <span class="metric-value" id="requestRate">1,245</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Queue Size</span>
+                    <span class="metric-value good" id="queueSize">12</span>
+                </div>
+            </div>
+
+            <!-- Resource Usage -->
+            <div class="card">
+                <h2>💾 Resources</h2>
+                <div class="metric">
+                    <div style="width: 100%">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="metric-label">Memory</span>
+                            <span class="metric-value warning" id="memoryUsage">72%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill warning" id="memoryBar" style="width: 72%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div style="width: 100%">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="metric-label">CPU</span>
+                            <span class="metric-value good" id="cpuUsage">45%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill good" id="cpuBar" style="width: 45%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div style="width: 100%">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="metric-label">Disk</span>
+                            <span class="metric-value good" id="diskUsage">58%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill good" id="diskBar" style="width: 58%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">DB Connections</span>
+                    <span class="metric-value good" id="dbConnections">25/50</span>
+                </div>
+            </div>
+
+            <!-- Active Alerts -->
+            <div class="card">
+                <h2>🚨 Active Alerts</h2>
+                <div id="alertsList">
+                    <div class="alert-item warning">
+                        <span>⚠️</span>
+                        <div>
+                            <div>Memory usage approaching threshold</div>
+                            <div class="timestamp">2 minutes ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <h2>🎛️ Control Panel</h2>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('services')">Services</button>
+                <button class="tab" onclick="switchTab('monitoring')">Monitoring</button>
+                <button class="tab" onclick="switchTab('emergency')">Emergency</button>
+                <button class="tab" onclick="switchTab('logs')">Logs</button>
+                <button class="tab" onclick="switchTab('documentation')">Documentation</button>
+            </div>
+
+            <!-- Services Tab -->
+            <div class="tab-content active" id="servicesTab">
+                <div class="control-grid">
+                    <button class="btn btn-success" onclick="executeCommand('start-all')">
+                        ▶️ Start All Services
+                    </button>
+                    <button class="btn btn-danger" onclick="executeCommand('stop-all')">
+                        ⏹️ Stop All Services
+                    </button>
+                    <button class="btn btn-warning" onclick="executeCommand('restart-backend')">
+                        🔄 Restart Backend
+                    </button>
+                    <button class="btn btn-warning" onclick="executeCommand('restart-frontend')">
+                        🔄 Restart Frontend
+                    </button>
+                    <button class="btn btn-primary" onclick="executeCommand('check-health')">
+                        🏥 Health Check
+                    </button>
+                    <button class="btn btn-secondary" onclick="executeCommand('view-processes')">
+                        📊 View Processes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Monitoring Tab -->
+            <div class="tab-content" id="monitoringTab">
+                <div class="control-grid">
+                    <button class="btn btn-success" onclick="executeCommand('start-monitoring')">
+                        📊 Start Monitoring
+                    </button>
+                    <button class="btn btn-success" onclick="executeCommand('start-alerts')">
+                        🚨 Start Alert System
+                    </button>
+                    <button class="btn btn-primary" onclick="executeCommand('view-alerts')">
+                        📋 View Alert Log
+                    </button>
+                    <button class="btn btn-primary" onclick="executeCommand('view-metrics')">
+                        📈 View Metrics
+                    </button>
+                    <button class="btn btn-warning" onclick="executeCommand('clear-logs')">
+                        🧹 Clear Old Logs
+                    </button>
+                    <button class="btn btn-secondary" onclick="executeCommand('export-logs')">
+                        💾 Export Logs
+                    </button>
+                </div>
+            </div>
+
+            <!-- Emergency Tab -->
+            <div class="tab-content" id="emergencyTab">
+                <div class="control-grid">
+                    <button class="btn btn-danger" onclick="executeCommand('emergency-restart')">
+                        🚨 Emergency Restart
+                    </button>
+                    <button class="btn btn-danger" onclick="executeCommand('kill-all')">
+                        ☠️ Force Kill All
+                    </button>
+                    <button class="btn btn-warning" onclick="executeCommand('clear-cache')">
+                        🧹 Clear All Caches
+                    </button>
+                    <button class="btn btn-warning" onclick="executeCommand('reset-db-connections')">
+                        🔌 Reset DB Connections
+                    </button>
+                    <button class="btn btn-primary" onclick="executeCommand('backup-system')">
+                        💾 Backup System
+                    </button>
+                    <button class="btn btn-secondary" onclick="executeCommand('safe-mode')">
+                        🛡️ Start Safe Mode
+                    </button>
+                </div>
+            </div>
+
+            <!-- Logs Tab -->
+            <div class="tab-content" id="logsTab">
+                <div class="control-grid">
+                    <button class="btn btn-primary" onclick="viewLog('stability')">
+                        📄 Stability Log
+                    </button>
+                    <button class="btn btn-primary" onclick="viewLog('alerts')">
+                        🚨 Alerts Log
+                    </button>
+                    <button class="btn btn-primary" onclick="viewLog('critical')">
+                        ⚠️ Critical Alerts
+                    </button>
+                    <button class="btn btn-primary" onclick="viewLog('backend')">
+                        🔧 Backend Log
+                    </button>
+                    <button class="btn btn-primary" onclick="viewLog('frontend')">
+                        🎨 Frontend Log
+                    </button>
+                    <button class="btn btn-secondary" onclick="refreshLogs()">
+                        🔄 Refresh Logs
+                    </button>
+                </div>
+                <div class="log-viewer" id="logViewer">
+                    <div class="log-entry info">[INFO] Select a log file to view...</div>
+                </div>
+            </div>
+
+            <!-- Documentation Tab -->
+            <div class="tab-content" id="documentationTab">
+                <div class="control-grid">
+                    <button class="btn btn-primary" onclick="openDoc('emergency')">
+                        📚 Emergency Procedures
+                    </button>
+                    <button class="btn btn-primary" onclick="openDoc('monitoring')">
+                        📊 Monitoring Guide
+                    </button>
+                    <button class="btn btn-primary" onclick="openDoc('alerts')">
+                        🚨 Alert Thresholds
+                    </button>
+                    <button class="btn btn-primary" onclick="openDoc('commands')">
+                        ⌨️ Command Reference
+                    </button>
+                    <button class="btn btn-primary" onclick="openDoc('troubleshooting')">
+                        🔧 Troubleshooting
+                    </button>
+                    <button class="btn btn-secondary" onclick="openDoc('all')">
+                        📖 View All Docs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API base URL
+        const API_URL = 'http://localhost:4000/api';
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Command execution via API
+        async function executeCommand(command) {
+            try {
+                showNotification(`Executing: ${command}`, 'info');
+                
+                const response = await fetch(`${API_URL}/execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification(`Command '${command}' completed successfully`, 'success');
+                    if (result.output) {
+                        console.log('Output:', result.output);
+                    }
+                } else {
+                    showNotification(`Command '${command}' failed: ${result.error}`, 'error');
+                    console.error('Error:', result.error);
+                }
+                
+                // Refresh metrics after command execution
+                setTimeout(() => updateMetrics(), 1000);
+            } catch (error) {
+                showNotification(`Failed to execute command: ${error.message}`, 'error');
+                console.error('Execution error:', error);
+            }
+        }
+
+        // View log files via API
+        async function viewLog(logType) {
+            const logViewer = document.getElementById('logViewer');
+            logViewer.innerHTML = '<div class="log-entry info">[INFO] Loading log...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/logs/${logType}?lines=50`);
+                const result = await response.json();
+                
+                if (result.content) {
+                    const lines = result.content.split('\n');
+                    logViewer.innerHTML = lines.map(line => {
+                        let className = 'log-entry';
+                        if (line.includes('ERROR') || line.includes('EMERGENCY')) className += ' error';
+                        else if (line.includes('WARNING') || line.includes('CRITICAL')) className += ' warning';
+                        else if (line.includes('INFO')) className += ' info';
+                        return `<div class="${className}">${line || '&nbsp;'}</div>`;
+                    }).join('');
+                } else {
+                    logViewer.innerHTML = '<div class="log-entry error">[ERROR] No log content available</div>';
+                }
+            } catch (error) {
+                logViewer.innerHTML = `<div class="log-entry error">[ERROR] Failed to load log: ${error.message}</div>`;
+            }
+        }
+
+        // Refresh logs
+        async function refreshLogs() {
+            const logViewer = document.getElementById('logViewer');
+            logViewer.innerHTML = '<div class="log-entry info">[INFO] Refreshing logs...</div>';
+            await viewLog('stability');
+        }
+
+        // Open documentation
+        function openDoc(docType) {
+            const docs = {
+                'emergency': 'EMERGENCY_RECOVERY.md',
+                'monitoring': 'Monitoring documentation',
+                'alerts': 'Alert thresholds configuration',
+                'commands': 'Command reference guide',
+                'troubleshooting': 'Troubleshooting guide',
+                'all': 'All documentation'
+            };
+            
+            showNotification(`Opening ${docs[docType]}...`, 'info');
+            // In real implementation, this would open the documentation
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            // In real implementation, this would show a toast notification
+        }
+
+        // Update metrics from API
+        async function updateMetrics() {
+            try {
+                // Fetch metrics from API
+                const response = await fetch(`${API_URL}/metrics`);
+                const metrics = await response.json();
+                
+                // Update timestamp
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                
+                // Update service status
+                updateServiceStatus('backendStatus', metrics.services.backend);
+                updateServiceStatus('frontendStatus', metrics.services.frontend);
+                updateServiceStatus('dbStatus', metrics.services.database);
+                updateServiceStatus('monitoringStatus', metrics.services.monitoring);
+                
+                // Update system status indicator
+                const allOnline = Object.values(metrics.services).every(s => s === 'online');
+                const systemIndicator = document.getElementById('systemStatus');
+                systemIndicator.className = 'status-indicator ' + (allOnline ? 'status-online' : 'status-warning');
+                
+                // Update memory
+                const memUsage = metrics.memory.usage;
+                document.getElementById('memoryUsage').textContent = `${memUsage}%`;
+                document.getElementById('memoryBar').style.width = `${memUsage}%`;
+                updateMetricClass('memoryUsage', memUsage, 70, 85);
+                updateMetricClass('memoryBar', memUsage, 70, 85);
+                
+                // Update CPU
+                const cpuUsage = metrics.cpu.usage;
+                document.getElementById('cpuUsage').textContent = `${cpuUsage}%`;
+                document.getElementById('cpuBar').style.width = `${cpuUsage}%`;
+                updateMetricClass('cpuUsage', cpuUsage, 60, 80);
+                updateMetricClass('cpuBar', cpuUsage, 60, 80);
+                
+                // Update response time
+                const responseTime = metrics.network.responseTime;
+                if (responseTime >= 0) {
+                    document.getElementById('responseTime').textContent = `${responseTime}ms`;
+                    updateMetricClass('responseTime', responseTime, 1000, 3000);
+                } else {
+                    document.getElementById('responseTime').textContent = 'N/A';
+                    document.getElementById('responseTime').className = 'metric-value critical';
+                }
+                
+                // Fetch and update database stats
+                const dbResponse = await fetch(`${API_URL}/database/stats`);
+                const dbStats = await dbResponse.json();
+                document.getElementById('dbConnections').textContent = `${dbStats.connections}/${dbStats.maxConnections}`;
+                updateMetricClass('dbConnections', dbStats.connections, 40, 45);
+                
+                // Fetch and update alerts
+                const alertsResponse = await fetch(`${API_URL}/alerts`);
+                const alerts = await alertsResponse.json();
+                updateAlertsList(alerts);
+                
+            } catch (error) {
+                console.error('Failed to update metrics:', error);
+                // Update system status to offline if API is not responding
+                document.getElementById('systemStatus').className = 'status-indicator status-offline';
+            }
+        }
+        
+        // Update service status display
+        function updateServiceStatus(elementId, status) {
+            const element = document.getElementById(elementId);
+            element.textContent = status === 'online' ? 'Online' : 'Offline';
+            element.className = 'metric-value ' + (status === 'online' ? 'good' : 'critical');
+        }
+        
+        // Update alerts list
+        function updateAlertsList(alerts) {
+            const alertsList = document.getElementById('alertsList');
+            if (alerts.length === 0) {
+                alertsList.innerHTML = '<div style="color: #6b7280; padding: 10px;">No active alerts</div>';
+                return;
+            }
+            
+            alertsList.innerHTML = alerts.slice(-5).reverse().map(alert => {
+                const level = alert.level || 'INFO';
+                const message = alert.message || JSON.stringify(alert);
+                const timestamp = alert.timestamp ? new Date(alert.timestamp).toLocaleString() : 'Unknown';
+                
+                let className = 'alert-item';
+                let icon = 'ℹ️';
+                if (level === 'WARNING') {
+                    className += ' warning';
+                    icon = '⚠️';
+                } else if (level === 'CRITICAL') {
+                    className += ' critical';
+                    icon = '🚨';
+                } else if (level === 'EMERGENCY') {
+                    className += ' emergency';
+                    icon = '🔴';
+                }
+                
+                return `
+                    <div class="${className}">
+                        <span>${icon}</span>
+                        <div>
+                            <div>${message}</div>
+                            <div class="timestamp">${timestamp}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update metric class based on thresholds
+        function updateMetricClass(elementId, value, warningThreshold, criticalThreshold) {
+            const element = document.getElementById(elementId);
+            element.classList.remove('good', 'warning', 'critical');
+            
+            if (value >= criticalThreshold) {
+                element.classList.add('critical');
+            } else if (value >= warningThreshold) {
+                element.classList.add('warning');
+            } else {
+                element.classList.add('good');
+            }
+        }
+
+        // Auto-refresh metrics every 5 seconds
+        setInterval(updateMetrics, 5000);
+        
+        // Initial update
+        updateMetrics();
+    </script>
+</body>
+</html>

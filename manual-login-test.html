@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manual Login Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .form-group { margin: 15px 0; }
+        input { padding: 8px; width: 300px; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        #result { margin-top: 20px; padding: 10px; background: #f0f0f0; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Manual Login Test</h1>
+    
+    <div class="form-group">
+        <label>Email:</label><br>
+        <input type="email" id="email" value="cuongtranhung@gmail.com">
+    </div>
+    
+    <div class="form-group">
+        <label>Password:</label><br>
+        <input type="password" id="password" value="@Abcd6789">
+    </div>
+    
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="openLoginPage()">Open Login Page</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = 'Testing login...';
+            
+            try {
+                // Test backend API directly
+                const response = await fetch('http://172.26.249.148:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Backend Login Successful!</h3>
+                            <p>Token: ${data.data.token.substring(0, 50)}...</p>
+                            <p>User: ${data.data.user.email}</p>
+                            <p>Name: ${data.data.user.full_name}</p>
+                        </div>
+                        <h3>Now testing from Frontend...</h3>
+                        <button onclick="testFrontendLogin()">Test Frontend Login</button>
+                    `;
+                    
+                    // Store token for next test
+                    window.testToken = data.data.token;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Login failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testFrontendLogin() {
+            const resultDiv = document.getElementById('result');
+            
+            // Open frontend login page and inject test
+            const loginWindow = window.open('http://172.26.249.148:3000/login', '_blank');
+            
+            resultDiv.innerHTML += `
+                <div>
+                    <h3>Instructions:</h3>
+                    <ol>
+                        <li>Login page opened in new tab</li>
+                        <li>Open browser console (F12)</li>
+                        <li>Check for any red errors</li>
+                        <li>Try to login manually</li>
+                        <li>Check if redirected to dashboard</li>
+                    </ol>
+                </div>
+            `;
+        }
+        
+        function openLoginPage() {
+            window.open('http://172.26.249.148:3000/login', '_blank');
+        }
+        
+        // Auto-test on load
+        window.onload = () => {
+            console.log('Manual test page loaded. Click "Test Login" to start.');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+{
+  "project": "XP - Fullstack Authentication System",
+  "version": "1.0.0",
+  "documentation": {
+    "standards": {
+      "language": {
+        "technical": "en",
+        "userGuides": ["en", "vi"],
+        "comments": "en"
+      },
+      "formatting": {
+        "markdown": true,
+        "lineLength": 120,
+        "indentation": 2,
+        "codeBlocks": "```language",
+        "headers": {
+          "useMetadata": true,
+          "required": ["title", "version", "date", "author", "status"]
+        }
+      },
+      "naming": {
+        "pattern": "kebab-case",
+        "format": "[category]-[topic]-[subtopic].md",
+        "examples": [
+          "api-auth-login.md",
+          "guide-form-builder-advanced.md",
+          "feature-comments-system.md"
+        ]
+      }
+    },
+    "structure": {
+      "root": "/docs",
+      "categories": {
+        "01-getting-started": "Introduction and setup guides",
+        "02-architecture": "System architecture and design",
+        "03-features": "Feature documentation",
+        "04-api": "API reference and endpoints",
+        "05-deployment": "Deployment and DevOps",
+        "06-testing": "Testing documentation",
+        "07-troubleshooting": "Problem solving guides",
+        "08-development": "Development guidelines",
+        "09-reports": "Analysis and reports",
+        "10-compliance": "Compliance and standards"
+      }
+    },
+    "automation": {
+      "triggers": {
+        "codeChange": {
+          "action": "update",
+          "timeout": "48h",
+          "priority": "high"
+        },
+        "newFeature": {
+          "action": "create",
+          "timeout": "before_release",
+          "priority": "critical"
+        },
+        "bugFix": {
+          "action": "update",
+          "timeout": "24h",
+          "priority": "medium"
+        },
+        "securityPatch": {
+          "action": "update",
+          "timeout": "immediate",
+          "priority": "critical"
+        }
+      },
+      "validation": {
+        "preCommit": [
+          "checkMarkdownSyntax",
+          "validateLinks",
+          "verifyCodeExamples",
+          "checkMetadata",
+          "validateNaming"
+        ],
+        "postUpdate": [
+          "updateIndexes",
+          "updateChangelog",
+          "crossReferenceCheck",
+          "notifyStakeholders"
+        ]
+      }
+    },
+    "templates": {
+      "feature": "/docs/templates/feature-doc-template.md",
+      "api": "/docs/templates/api-doc-template.md",
+      "guide": "/docs/templates/guide-template.md",
+      "troubleshooting": "/docs/templates/troubleshooting-template.md"
+    },
+    "rules": {
+      "security": {
+        "forbidden": [
+          "passwords",
+          "apiKeys",
+          "tokens",
+          "internalUrls",
+          "userData"
+        ],
+        "required": [
+          "sanitizeExamples",
+          "anonymizeData",
+          "securityWarnings"
+        ]
+      },
+      "quality": {
+        "required": [
+          "examples",
+          "troubleshooting",
+          "references",
+          "testing"
+        ],
+        "metrics": {
+          "completeness": 0.95,
+          "accuracy": 1.0,
+          "currency": 7,
+          "coverage": 0.9
+        }
+      },
+      "maintenance": {
+        "reviewCycle": "monthly",
+        "archivePolicy": "3_versions",
+        "deprecationNotice": "30_days"
+      }
+    },
+    "aiGuidelines": {
+      "behavior": {
+        "preserve": "Always maintain existing structure",
+        "enhance": "Add value without breaking changes",
+        "clarify": "Request confirmation for major changes",
+        "validate": "Test all code examples before documenting"
+      },
+      "priorities": [
+        "Accuracy over speed",
+        "Consistency over creativity",
+        "Clarity over brevity",
+        "Security over convenience"
+      ],
+      "restrictions": [
+        "Never delete without explicit permission",
+        "Never expose sensitive information",
+        "Never change core structure without approval",
+        "Never create duplicate documentation"
+      ]
+    },
+    "integration": {
+      "versionControl": {
+        "commitFormat": "docs: [action] [scope] - [description]",
+        "actions": ["add", "update", "fix", "remove", "refactor"],
+        "branchNaming": "docs/[feature-or-fix-description]"
+      },
+      "cicd": {
+        "pipeline": "/.github/workflows/docs.yml",
+        "stages": ["validate", "build", "deploy"],
+        "deployment": {
+          "dev": "automatic",
+          "staging": "manual",
+          "production": "approved"
+        }
+      }
+    },
+    "techStack": {
+      "frontend": {
+        "framework": "React 18.2",
+        "language": "TypeScript 5.7",
+        "styling": "Tailwind CSS",
+        "build": "Vite 6.0"
+      },
+      "backend": {
+        "runtime": "Node.js 18+",
+        "framework": "Express 4.18",
+        "language": "TypeScript 5.9",
+        "database": "PostgreSQL"
+      },
+      "tools": {
+        "testing": ["Jest", "Playwright"],
+        "linting": ["ESLint", "Prettier"],
+        "documentation": ["Markdown", "JSDoc", "TypeDoc"]
+      }
+    }
+  },
+  "metadata": {
+    "created": "2025-01-10",
+    "lastUpdated": "2025-01-10",
+    "maintainer": "XP Development Team",
+    "contact": "dev@xpproject.com"
+  }
+}

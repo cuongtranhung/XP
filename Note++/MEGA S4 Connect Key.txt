@@ -1,0 +1,4 @@
+Chìa khóa truy cập: AKIAE2UFTZ4B2S7WRI7YJH6MBKUNCMRZ3PLGNCVEAMNI
+Chìa khóa bí mật: wnIfhTcFGyEJHr5avWADfP5chU74udkpIqVAgQt5
+Bucket name: xp-uploads
+Endpoint: s3.eu-central-1.s4.mega.io

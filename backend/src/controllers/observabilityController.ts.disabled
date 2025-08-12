@@ -1,0 +1,485 @@
+/**
+ * Observability Controller
+ * 
+ * API endpoints for managing dashboards, alerts, and monitoring
+ */
+
+import { Request, Response } from 'express';
+import { observabilityPlatform } from '../services/observabilityPlatform';
+import { logger } from '../utils/logger';
+import { instrumentBusinessOperation } from '../middleware/observabilityMiddleware';
+
+export class ObservabilityController {
+
+  /**
+   * GET /api/observability/metrics
+   * Query metrics with time range and filters
+   */
+  async queryMetrics(req: Request, res: Response): Promise<void> {
+    try {
+      const { query, from, to, relative } = req.query;
+
+      if (!query) {
+        res.status(400).json({
+          success: false,
+          message: 'Query parameter is required'
+        });
+        return;
+      }
+
+      // Parse time range
+      let timeRange;
+      if (relative) {
+        const now = new Date();
+        let fromDate: Date;
+        
+        switch (relative) {
+          case 'last_1h':
+            fromDate = new Date(now.getTime() - 60 * 60 * 1000);
+            break;
+          case 'last_24h':
+            fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          case 'last_7d':
+            fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+          default:
+            fromDate = new Date(now.getTime() - 60 * 60 * 1000);
+        }
+        
+        timeRange = { from: fromDate, to: now };
+      } else if (from && to) {
+        timeRange = {
+          from: new Date(from as string),
+          to: new Date(to as string)
+        };
+      } else {
+        // Default to last hour
+        const now = new Date();
+        timeRange = {
+          from: new Date(now.getTime() - 60 * 60 * 1000),
+          to: now
+        };
+      }
+
+      const metrics = await instrumentBusinessOperation(
+        'query_metrics',
+        { query: query as string },
+        async () => {
+          return await observabilityPlatform.queryMetrics(query as string, timeRange);
+        }
+      );
+
+      res.json({
+        success: true,
+        data: {
+          metrics,
+          timeRange,
+          count: metrics.length
+        }
+      });
+
+    } catch (error) {
+      logger.error('Failed to query metrics', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        query: req.query
+      });
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to query metrics',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * POST /api/observability/dashboards
+   * Create a new dashboard
+   */
+  async createDashboard(req: Request, res: Response): Promise<void> {
+    try {
+      const { name, description, widgets, timeRange, refreshInterval, permissions } = req.body;
+
+      if (!name || !widgets) {
+        res.status(400).json({
+          success: false,
+          message: 'Name and widgets are required'
+        });
+        return;
+      }
+
+      const dashboardId = await instrumentBusinessOperation(
+        'create_dashboard',
+        { name },
+        async () => {
+          return await observabilityPlatform.createDashboard({
+            name,
+            description: description || '',
+            widgets: widgets || [],
+            timeRange: timeRange || {
+              from: new Date(Date.now() - 24 * 60 * 60 * 1000),
+              to: new Date(),
+              relative: 'last_24h'
+            },
+            refreshInterval: refreshInterval || 30,
+            permissions: permissions || []
+          });
+        }
+      );
+
+      res.status(201).json({
+        success: true,
+        data: {
+          dashboardId,
+          message: 'Dashboard created successfully'
+        }
+      });
+
+    } catch (error) {
+      logger.error('Failed to create dashboard', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        body: req.body
+      });
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create dashboard',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * GET /api/observability/dashboards/:id
+   * Get dashboard by ID
+   */
+  async getDashboard(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const dashboard = await instrumentBusinessOperation(
+        'get_dashboard',
+        { dashboardId: id },
+        async () => {
+          return await observabilityPlatform.getDashboard(id);
+        }
+      );
+
+      if (!dashboard) {
+        res.status(404).json({
+          success: false,
+          message: 'Dashboard not found'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: dashboard
+      });
+
+    } catch (error) {
+      logger.error('Failed to get dashboard', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        dashboardId: req.params.id
+      });
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get dashboard',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * PUT /api/observability/dashboards/:id
+   * Update dashboard
+   */
+  async updateDashboard(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      const success = await instrumentBusinessOperation(
+        'update_dashboard',
+        { dashboardId: id },
+        async () => {
+          return await observabilityPlatform.updateDashboard(id, updates);
+        }
+      );
+
+      if (!success) {
+        res.status(404).json({
+          success: false,
+          message: 'Dashboard not found'
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        message: 'Dashboard updated successfully'
+      });
+
+    } catch (error) {
+      logger.error('Failed to update dashboard', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        dashboardId: req.params.id,
+        updates: req.body
+      });
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update dashboard',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * POST /api/observability/alerts
+   * Create alert condition
+   */
+  async createAlertCondition(req: Request, res: Response): Promise<void> {
+    try {
+      const {
+        name,
+        description,
+        query,
+        threshold,
+        operator,
+        timeWindow,
+        severity,
+        channels
+      } = req.body;
+
+      if (!name || !query || threshold === undefined || !operator) {
+        res.status(400).json({
+          success: false,
+          message: 'Name, query, threshold, and operator are required'
+        });
+        return;
+      }
+
+      const conditionId = await instrumentBusinessOperation(
+        'create_alert_condition',
+        { name, severity: severity || 'medium' },
+        async () => {
+          return await observabilityPlatform.createAlertCondition({
+            name,
+            description: description || '',
+            query,
+            threshold,
+            operator,
+            timeWindow: timeWindow || 5,
+            severity: severity || 'medium',
+            enabled: true,
+            channels: channels || []
+          });
+        }
+      );
+
+      res.status(201).json({
+        success: true,
+        data: {
+          conditionId,
+          message: 'Alert condition created successfully'
+        }
+      });
+
+    } catch (error) {
+      logger.error('Failed to create alert condition', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        body: req.body
+      });
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create alert condition',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * GET /api/observability/sla/:service
+   * Get SLA metrics for a service
+   */
+  async getServiceSLA(req: Request, res: Response): Promise<void> {
+    try {
+      const { service } = req.params;
+      const { from, to, relative } = req.query;
+
+      // Parse time range (same logic as queryMetrics)
+      let timeRange;
+      if (relative) {
+        const now = new Date();
+        let fromDate: Date;
+        
+        switch (relative) {
+          case 'last_1h':
+            fromDate = new Date(now.getTime() - 60 * 60 * 1000);
+            break;
+          case 'last_24h':
+            fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          case 'last_7d':
+            fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+          default:
+            fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        }
+        
+        timeRange = { from: fromDate, to: now };
+      } else if (from && to) {
+        timeRange = {
+          from: new Date(from as string),
+          to: new Date(to as string)
+        };
+      } else {
+        // Default to last 24 hours
+        const now = new Date();
+        timeRange = {
+          from: new Date(now.getTime() - 24 * 60 * 60 * 1000),
+          to: now
+        };
+      }
+
+      const slaMetrics = await instrumentBusinessOperation(
+        'calculate_sla',
+        { service },
+        async () => {
+          return await observabilityPlatform.calculateSLA(service, timeRange);
+        }
+      );
+
+      res.json({
+        success: true,
+        data: {
+          service,
+          timeRange,
+          sla: slaMetrics
+        }
+      });
+
+    } catch (error) {
+      logger.error('Failed to get SLA metrics', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        service: req.params.service
+      });
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get SLA metrics',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * GET /api/observability/health
+   * Get system health metrics
+   */
+  async getSystemHealth(req: Request, res: Response): Promise<void> {
+    try {
+      const healthMetrics = await instrumentBusinessOperation(
+        'get_system_health',
+        {},
+        async () => {
+          return await observabilityPlatform.getSystemHealthMetrics();
+        }
+      );
+
+      res.json({
+        success: true,
+        data: healthMetrics
+      });
+
+    } catch (error) {
+      logger.error('Failed to get system health metrics', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get system health metrics',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * POST /api/observability/metrics
+   * Record custom metric (for external services)
+   */
+  async recordMetric(req: Request, res: Response): Promise<void> {
+    try {
+      const { name, value, unit, tags, type } = req.body;
+
+      if (!name || value === undefined || !unit || !type) {
+        res.status(400).json({
+          success: false,
+          message: 'Name, value, unit, and type are required'
+        });
+        return;
+      }
+
+      await instrumentBusinessOperation(
+        'record_custom_metric',
+        { metricName: name, metricType: type },
+        async () => {
+          await observabilityPlatform.recordMetric({
+            name,
+            value,
+            unit,
+            timestamp: new Date(),
+            tags: tags || {},
+            type
+          });
+        }
+      );
+
+      res.json({
+        success: true,
+        message: 'Metric recorded successfully'
+      });
+
+    } catch (error) {
+      logger.error('Failed to record metric', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        body: req.body
+      });
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to record metric',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * GET /api/observability/traces/:id
+   * Get trace by ID (future implementation)
+   */
+  async getTrace(req: Request, res: Response): Promise<void> {
+    try {
+      // This would be implemented when trace storage is added
+      res.status(501).json({
+        success: false,
+        message: 'Trace retrieval not yet implemented'
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get trace',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+}
+
+export const observabilityController = new ObservabilityController();

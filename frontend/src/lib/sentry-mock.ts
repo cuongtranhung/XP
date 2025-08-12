@@ -1,0 +1,1 @@
+export const Sentry = { init: () => {}, setUser: () => {}, setContext: () => {}, setTag: () => {}, withScope: () => {}, captureException: () => {}, captureMessage: () => {}, addBreadcrumb: () => {}, BrowserTracing: class {}, React: { Profiler: class {} }, HttpContext: class {}, ReportingObserver: class {}, reactRouterV6Instrumentation: () => ({}) };

@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  redis-master:
+    image: redis:7.2-alpine
+    container_name: xp-redis-master
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf --appendonly yes
+    restart: unless-stopped
+    networks:
+      - xp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+
+  redis-replica-1:
+    image: redis:7.2-alpine
+    container_name: xp-redis-replica-1
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-replica1-data:/data
+    command: redis-server --slaveof redis-master 6379 --appendonly yes
+    restart: unless-stopped
+    networks:
+      - xp-network
+    depends_on:
+      - redis-master
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis-replica-2:
+    image: redis:7.2-alpine
+    container_name: xp-redis-replica-2
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis-replica2-data:/data
+    command: redis-server --slaveof redis-master 6379 --appendonly yes
+    restart: unless-stopped
+    networks:
+      - xp-network
+    depends_on:
+      - redis-master
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis-sentinel-1:
+    image: redis:7.2-alpine
+    container_name: xp-redis-sentinel-1
+    ports:
+      - "26379:26379"
+    volumes:
+      - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+    command: redis-sentinel /etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+    networks:
+      - xp-network
+    restart: unless-stopped
+
+  redis-sentinel-2:
+    image: redis:7.2-alpine
+    container_name: xp-redis-sentinel-2
+    ports:
+      - "26380:26379"
+    volumes:
+      - ./redis/sentinel-2.conf:/etc/redis/sentinel.conf
+    command: redis-sentinel /etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+    networks:
+      - xp-network
+    restart: unless-stopped
+
+  redis-sentinel-3:
+    image: redis:7.2-alpine
+    container_name: xp-redis-sentinel-3
+    ports:
+      - "26381:26379"
+    volumes:
+      - ./redis/sentinel-3.conf:/etc/redis/sentinel.conf
+    command: redis-sentinel /etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+    networks:
+      - xp-network
+    restart: unless-stopped
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: xp-redis-ui
+    environment:
+      - REDIS_HOSTS=master:redis-master:6379,replica1:redis-replica-1:6379,replica2:redis-replica-2:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    ports:
+      - "8081:8081"
+    networks:
+      - xp-network
+    depends_on:
+      - redis-master
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+    driver: local
+  redis-replica1-data:
+    driver: local
+  redis-replica2-data:
+    driver: local
+
+networks:
+  xp-network:
+    driver: bridge

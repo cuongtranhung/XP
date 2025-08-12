@@ -1,0 +1,273 @@
+How to Run and Test the Fullstack Authentication System
+
+  Prerequisites
+
+  Before running the project, ensure you have:
+  - Node.js (v18 or higher)
+  - PostgreSQL (running on 192.168.5.3:8080 with credentials postgres:@abcd1234)
+  - npm (v9 or higher)
+
+  Project Structure
+
+  /mnt/c/Users/Admin/source/repos/XP/
+  ├── backend/          # Express.js API server
+  ├── frontend/         # React application
+  ├── e2e/             # End-to-end tests
+  └── docs/            # Documentation
+hel
+  Step 1: Database Setup
+
+  First, create the database and run migrations:
+
+  # Connect to your PostgreSQL server
+  psql -h 192.168.5.3 -p 8080 -U postgres
+
+  # Create the databases
+  CREATE DATABASE fullstack_auth;
+  CREATE DATABASE fullstack_auth_test;
+  \q
+
+  Now run the migrations:
+
+  cd /mnt/c/Users/Admin/source/repos/XP/backend
+  npm run migrate
+
+  Step 2: Backend Setup
+
+  Install Dependencies
+
+  cd /mnt/c/Users/Admin/source/repos/XP/backend
+  npm install
+
+  Configure Environment
+
+  The .env file is already configured with your PostgreSQL connection. To use email features, update the SMTP settings:
+
+  # Edit .env file
+  SMTP_HOST=smtp.gmail.com
+  SMTP_PORT=587
+  SMTP_USER=your-email@gmail.com
+  SMTP_PASS=your-app-password
+
+  Run the Backend
+
+  # Development mode with hot reload
+  npm run dev
+
+  # Production mode
+  npm run build
+  npm start
+
+  The backend will run on http://localhost:5000
+
+  Test the Backend
+
+  # Run all tests
+  npm test
+
+  # Run tests with coverage report
+  npm run test:coverage
+
+  # Run tests in watch mode
+  npm run test:watch
+
+  Step 3: Frontend Setup
+
+  Install Dependencies
+
+  cd /mnt/c/Users/Admin/source/repos/XP/frontend
+  npm install
+
+  Run the Frontend
+
+  # Development mode with hot reload
+  npm run dev
+
+  # Build for production
+  npm run build
+
+  # Preview production build
+  npm run preview
+
+  The frontend will run on http://localhost:3000
+
+  Test the Frontend
+
+  # Run all tests
+  npm test
+
+  # Run tests with coverage
+  npm run test:coverage
+
+  # Run tests in watch mode
+  npm run test:watch
+
+  Step 4: Running End-to-End Tests
+
+  Install Playwright
+
+  cd /mnt/c/Users/Admin/source/repos/XP/e2e
+  npm install
+  npx playwright install
+
+  Run E2E Tests
+
+  # Run all tests
+  npm test
+
+  # Run with UI mode (recommended for debugging)
+  npm run test:ui
+
+  # Run in debug mode
+  npm run test:debug
+
+  # Generate test code by recording actions
+  npm run test:codegen
+
+  Step 5: Manual Testing Guide
+
+  1. Start Both Servers
+
+  Open two terminal windows:
+
+  Terminal 1 - Backend:
+  cd /mnt/c/Users/Admin/source/repos/XP/backend
+  npm run dev
+
+  Terminal 2 - Frontend:
+  cd /mnt/c/Users/Admin/source/repos/XP/frontend
+  npm run dev
+
+  2. Open the Application
+
+  Navigate to http://localhost:3000 in your browser
+
+  3. Test User Registration
+
+  1. Click "Sign up" link
+  2. Fill in the form:
+    - Name: Test User
+    - Email: test@example.com
+    - Password: TestPassword123!
+    - Confirm Password: TestPassword123!
+  3. Click "Sign up" button
+  4. You should be redirected to the dashboard
+
+  4. Test Login
+
+  1. Click "Logout" in the dashboard
+  2. Enter credentials:
+    - Email: test@example.com
+    - Password: TestPassword123!
+  3. Click "Sign in"
+  4. You should see the dashboard with your user info
+
+  5. Test Password Reset
+
+  1. Logout and go to login page
+  2. Click "Forgot your password?"
+  3. Enter your email: test@example.com
+  4. Click "Send reset instructions"
+  5. Check the console logs for the reset token (since email is not configured)
+  6. Use the token in the reset password form
+
+  6. Test Protected Routes
+
+  1. While logged out, try to access http://localhost:3000/dashboard
+  2. You should be redirected to login
+  3. After logging in, you can access the dashboard
+
+  Quick Start Script
+
+  Create a script to run everything at once:
+
+  #!/bin/bash
+  # save as: run-project.sh
+
+  echo "Starting Fullstack Authentication System..."
+
+  # Start backend
+  cd /mnt/c/Users/Admin/source/repos/XP/backend
+  npm run dev &
+  BACKEND_PID=$!
+
+  # Wait for backend to start
+  sleep 5
+
+  # Start frontend
+  cd /mnt/c/Users/Admin/source/repos/XP/frontend
+  npm run dev &
+  FRONTEND_PID=$!
+
+  echo "Backend running on http://localhost:5000"
+  echo "Frontend running on http://localhost:3000"
+  echo "Press Ctrl+C to stop all services"
+
+  # Wait for user to stop
+  wait
+
+  Make it executable:
+  chmod +x run-project.sh
+  ./run-project.sh
+
+  Troubleshooting
+
+  Common Issues
+
+  1. Database Connection Error
+  Error: connect ECONNREFUSED
+    - Ensure PostgreSQL is running on 192.168.5.3:8080
+    - Check credentials in .env file
+  2. Port Already in Use
+  Error: listen EADDRINUSE :::5000
+    - Kill the process: lsof -ti:5000 | xargs kill -9
+    - Or change the port in .env
+  3. Module Not Found
+  Error: Cannot find module
+    - Run npm install in the respective directory
+    - Delete node_modules and reinstall if needed
+  4. TypeScript Errors
+  TS2307: Cannot find module
+    - Run npm run build to compile TypeScript
+    - Check tsconfig.json paths
+
+  API Testing with cURL
+
+  Test the API directly:
+
+  # Register a new user
+  curl -X POST http://localhost:5000/api/auth/register \
+    -H "Content-Type: application/json" \
+    -d '{"email":"test@example.com","password":"Test123!","name":"Test User"}'
+
+  # Login
+  curl -X POST http://localhost:5000/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"email":"test@example.com","password":"Test123!"}'
+
+  # Validate token (replace YOUR_TOKEN)
+  curl -X GET http://localhost:5000/api/auth/validate \
+    -H "Authorization: Bearer YOUR_TOKEN"
+
+  Development Tools
+
+  Useful VS Code Extensions
+
+  - ESLint: For linting
+  - Prettier: For code formatting
+  - Thunder Client: For API testing
+  - PostgreSQL: For database management
+
+  Browser Extensions
+
+  - React Developer Tools: For debugging React
+  - Redux DevTools: If using Redux (not in this project)
+
+  Next Steps
+
+  1. Configure Email: Set up SMTP credentials for password reset emails
+  2. Add SSL: Configure HTTPS for production
+  3. Set up CI/CD: Use the GitHub Actions workflow in TEST_REPORT.md
+  4. Monitor: Add logging and monitoring for production
+
+  The system is now ready for development and testing! 🚀

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+coverage/
+*.config.js
+*.config.ts
+package-lock.json
+.eslintrc.js
+.eslintrc.json
+*.min.js
+*.min.css

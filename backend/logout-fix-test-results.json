@@ -1,0 +1,12 @@
+{
+  "issue": "Test logout fix - no redundant session expiry warnings",
+  "beforeFix": "Multiple session expiry warnings on logout",
+  "afterFix": "Clean logout without redundant warnings",
+  "testResults": [
+    {
+      "step": "test-execution",
+      "status": "error",
+      "description": "Test execution failed: Request failed with status code 429"
+    }
+  ]
+}

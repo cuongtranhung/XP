@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Test Images</title>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Create 3 test images
+        for (let i = 1; i <= 3; i++) {
+            // Clear canvas
+            ctx.fillStyle = `hsl(${i * 120}, 70%, 50%)`;
+            ctx.fillRect(0, 0, 800, 600);
+            
+            // Add text
+            ctx.fillStyle = 'white';
+            ctx.font = '72px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Test Image ${i}`, 400, 300);
+            
+            // Convert to blob and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `test-image-${i}.jpg`;
+                a.click();
+            }, 'image/jpeg');
+        }
+        
+        document.body.innerHTML += '<p>Test images created. Check your downloads folder.</p>';
+    </script>
+</body>
+</html>

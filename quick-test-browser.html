@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page Diagnostic Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Login Page Diagnostic Test</h1>
+    
+    <div class="test info">
+        <h3>Step 1: Basic Connectivity</h3>
+        <button onclick="testBasicConnectivity()">Test Frontend Connection</button>
+        <div id="connectivity-result"></div>
+    </div>
+
+    <div class="test info">
+        <h3>Step 2: React Loading</h3>
+        <button onclick="testReactLoading()">Check React in Login Page</button>
+        <div id="react-result"></div>
+    </div>
+
+    <div class="test info">
+        <h3>Step 3: Direct Login Page Test</h3>
+        <p>Click this link to test direct access to login page:</p>
+        <a href="http://localhost:3000/login" target="_blank" style="color: #007bff; font-weight: bold;">
+            → Open Login Page in New Tab
+        </a>
+    </div>
+
+    <div class="test info">
+        <h3>Step 4: Backend API Test</h3>
+        <button onclick="testBackendAPI()">Test Backend Connection</button>
+        <div id="backend-result"></div>
+    </div>
+
+    <script>
+        function testBasicConnectivity() {
+            const resultDiv = document.getElementById('connectivity-result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            fetch('http://localhost:3000/login')
+                .then(response => {
+                    if (response.ok) {
+                        resultDiv.innerHTML = `
+                            <div class="success">
+                                <h4>✅ SUCCESS: Frontend server is accessible</h4>
+                                <p>Status: ${response.status}</p>
+                                <p>Content-Type: ${response.headers.get('content-type')}</p>
+                            </div>
+                        `;
+                        return response.text();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                })
+                .then(html => {
+                    const hasReact = html.includes('React') || html.includes('react');
+                    const hasRoot = html.includes('id="root"');
+                    const hasMainTsx = html.includes('/src/main.tsx');
+                    
+                    resultDiv.innerHTML += `
+                        <div class="info">
+                            <h4>📋 HTML Analysis:</h4>
+                            <p>Contains React: ${hasReact ? '✅' : '❌'}</p>
+                            <p>Has root element: ${hasRoot ? '✅' : '❌'}</p>
+                            <p>Loads main.tsx: ${hasMainTsx ? '✅' : '❌'}</p>
+                            <p>HTML length: ${html.length} characters</p>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ ERROR: Cannot connect to frontend</h4>
+                            <p>${error.message}</p>
+                            <p><strong>This means your frontend server is not running!</strong></p>
+                        </div>
+                    `;
+                });
+        }
+        
+        function testReactLoading() {
+            const resultDiv = document.getElementById('react-result');
+            resultDiv.innerHTML = '<p>Opening login page in iframe...</p>';
+            
+            // Create hidden iframe to test React loading
+            const iframe = document.createElement('iframe');
+            iframe.src = 'http://localhost:3000/login';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            setTimeout(() => {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const rootElement = iframeDoc.getElementById('root');
+                    const hasContent = rootElement && rootElement.innerHTML.trim().length > 0;
+                    
+                    resultDiv.innerHTML = hasContent ? 
+                        `<div class="success">
+                            <h4>✅ SUCCESS: React is rendering content</h4>
+                            <p>Root element has content: ${rootElement.innerHTML.length} characters</p>
+                        </div>` :
+                        `<div class="error">
+                            <h4>❌ ERROR: React is not rendering</h4>
+                            <p>Root element is empty. Check browser console for JavaScript errors.</p>
+                        </div>`;
+                } catch (error) {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ ERROR: Cannot access iframe content</h4>
+                            <p>This might be due to CORS restrictions or React not loading.</p>
+                        </div>
+                    `;
+                } finally {
+                    document.body.removeChild(iframe);
+                }
+            }, 3000);
+        }
+        
+        function testBackendAPI() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.innerHTML = '<p>Testing backend API...</p>';
+            
+            fetch('http://localhost:5000/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: 'test@example.com',
+                    password: 'testpassword'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ SUCCESS: Backend API is responding</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ ERROR: Backend API unreachable</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            });
+        }
+    </script>
+    
+    <div class="test">
+        <h3>📋 Instructions:</h3>
+        <ol>
+            <li>Run all tests above in order</li>
+            <li>Check the results for each test</li>
+            <li>If "Step 3" doesn't show the login form, press F12 and check Console for errors</li>
+            <li>Report back which tests pass/fail</li>
+        </ol>
+    </div>
+</body>
+</html>

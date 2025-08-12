@@ -1,0 +1,70 @@
+# Docker Compose configuration for production
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - NODE_ENV=production
+        - VITE_API_URL=${VITE_API_URL}
+        - VITE_APP_NAME=${VITE_APP_NAME}
+        - VITE_APP_VERSION=${VITE_APP_VERSION}
+    container_name: xp-frontend-prod
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - xp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["/usr/local/bin/health-check.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:rw,noexec,nosuid,size=50m
+      - /var/run:rw,noexec,nosuid,size=50m
+      - /tmp:rw,noexec,nosuid,size=50m
+
+  # Optional: Add a reverse proxy/load balancer
+  nginx-proxy:
+    image: nginx:1.25-alpine
+    container_name: xp-nginx-proxy
+    ports:
+      - "443:443"
+    volumes:
+      - ./docker/ssl:/etc/nginx/ssl:ro
+      - ./docker/proxy.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+    networks:
+      - xp-network
+    restart: unless-stopped
+    profiles:
+      - ssl
+
+networks:
+  xp-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+
+volumes:
+  nginx_cache:
+    driver: local

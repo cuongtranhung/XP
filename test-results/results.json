@@ -1,0 +1,222 @@
+{
+  "config": {
+    "configFile": "/mnt/c/Users/Admin/source/repos/XP/playwright.config.js",
+    "rootDir": "/mnt/c/Users/Admin/source/repos/XP/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 3
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "test-results/html-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "line",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/mnt/c/Users/Admin/source/repos/XP/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/mnt/c/Users/Admin/source/repos/XP/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.54.2",
+    "workers": 6,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "comment-upload-test.spec.js",
+      "file": "comment-upload-test.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Comment Module File Upload Testing",
+          "file": "comment-upload-test.spec.js",
+          "line": 11,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Image Display Fix - No 401 Errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6341,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Login successful\n"
+                        },
+                        {
+                          "text": "Testing image display fix...\n"
+                        },
+                        {
+                          "text": "Found 0 comment images\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-12T05:36:53.776Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "95310de03dc0fc13b5d1-d46a7bf2f33a3c23ab93",
+              "file": "comment-upload-test.spec.js",
+              "line": 29,
+              "column": 3
+            },
+            {
+              "title": "Toast Notifications Testing",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 8746,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Login successful\n"
+                        },
+                        {
+                          "text": "Testing toast notifications...\n"
+                        },
+                        {
+                          "text": "Comment section not found\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-12T05:36:51.180Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "95310de03dc0fc13b5d1-92ee5391e917faf83a14",
+              "file": "comment-upload-test.spec.js",
+              "line": 79,
+              "column": 3
+            },
+            {
+              "title": "End-to-End Integration Test",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 10006,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Login successful\n"
+                        },
+                        {
+                          "text": "Running end-to-end integration test...\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-12T05:36:51.188Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "95310de03dc0fc13b5d1-23d8770de1777473aa74",
+              "file": "comment-upload-test.spec.js",
+              "line": 160,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-08-12T05:36:46.212Z",
+    "duration": 16160.481000000002,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

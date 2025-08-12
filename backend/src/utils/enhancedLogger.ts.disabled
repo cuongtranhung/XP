@@ -1,0 +1,274 @@
+import winston from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
+import { Request } from 'express';
+import path from 'path';
+
+// Create logs directory if it doesn't exist
+const logDir = path.join(process.cwd(), 'logs');
+
+// Define log format
+const logFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.errors({ stack: true }),
+  winston.format.json(),
+  winston.format.prettyPrint()
+);
+
+// Console format for development
+const consoleFormat = winston.format.combine(
+  winston.format.colorize(),
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  winston.format.printf(({ timestamp, level, message, ...meta }) => {
+    const metaString = Object.keys(meta).length > 0 ? JSON.stringify(meta, null, 2) : '';
+    return `[${timestamp}] ${level}: ${message} ${metaString}`;
+  })
+);
+
+// Create Winston logger with rotation
+const enhancedLogger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: logFormat,
+  transports: [
+    // Error logs - separate file, keep for 14 days
+    new DailyRotateFile({
+      filename: path.join(logDir, 'error-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      level: 'error',
+      maxSize: '20m',
+      maxFiles: '14d',
+      auditFile: path.join(logDir, '.error-audit.json')
+    }),
+
+    // Combined logs - all levels, keep for 7 days
+    new DailyRotateFile({
+      filename: path.join(logDir, 'combined-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '20m',
+      maxFiles: '7d',
+      auditFile: path.join(logDir, '.combined-audit.json')
+    }),
+
+    // Performance logs - separate tracking
+    new DailyRotateFile({
+      filename: path.join(logDir, 'performance-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      level: 'debug',
+      maxSize: '10m',
+      maxFiles: '3d',
+      auditFile: path.join(logDir, '.performance-audit.json'),
+      format: winston.format.combine(
+        winston.format.label({ label: 'PERF' }),
+        logFormat
+      )
+    }),
+
+    // Security logs - keep longer for audit
+    new DailyRotateFile({
+      filename: path.join(logDir, 'security-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '10m',
+      maxFiles: '30d',
+      auditFile: path.join(logDir, '.security-audit.json'),
+      format: winston.format.combine(
+        winston.format.label({ label: 'SECURITY' }),
+        logFormat
+      )
+    })
+  ],
+
+  // Handle exceptions and rejections
+  exceptionHandlers: [
+    new DailyRotateFile({
+      filename: path.join(logDir, 'exceptions-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '10m',
+      maxFiles: '14d'
+    })
+  ],
+
+  rejectionHandlers: [
+    new DailyRotateFile({
+      filename: path.join(logDir, 'rejections-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '10m',
+      maxFiles: '14d'
+    })
+  ]
+});
+
+// Add console transport for development
+if (process.env.NODE_ENV !== 'production') {
+  enhancedLogger.add(new winston.transports.Console({
+    format: consoleFormat,
+    level: 'debug'
+  }));
+}
+
+// Enhanced Logger class with additional features
+export class EnhancedLogger {
+  private static instance: EnhancedLogger;
+  private winston: winston.Logger;
+
+  constructor() {
+    this.winston = enhancedLogger;
+    this.setupRotationEvents();
+  }
+
+  static getInstance(): EnhancedLogger {
+    if (!EnhancedLogger.instance) {
+      EnhancedLogger.instance = new EnhancedLogger();
+    }
+    return EnhancedLogger.instance;
+  }
+
+  private setupRotationEvents(): void {
+    // Listen for rotation events
+    this.winston.transports.forEach((transport) => {
+      if (transport instanceof DailyRotateFile) {
+        transport.on('rotate', (oldFilename, newFilename) => {
+          console.log(`📝 Log file rotated: ${oldFilename} → ${newFilename}`);
+        });
+
+        transport.on('archive', (zipFilename) => {
+          console.log(`📦 Log file archived: ${zipFilename}`);
+        });
+
+        transport.on('logRemoved', (removedFilename) => {
+          console.log(`🗑️ Old log file removed: ${removedFilename}`);
+        });
+      }
+    });
+  }
+
+  // Standard logging methods
+  error(message: string, meta?: Record<string, any>): void {
+    this.winston.error(message, meta);
+  }
+
+  warn(message: string, meta?: Record<string, any>): void {
+    this.winston.warn(message, meta);
+  }
+
+  info(message: string, meta?: Record<string, any>): void {
+    this.winston.info(message, meta);
+  }
+
+  debug(message: string, meta?: Record<string, any>): void {
+    this.winston.debug(message, meta);
+  }
+
+  // Enhanced logging methods
+  logRequest(req: Request, responseTime?: number): void {
+    const requestData = {
+      method: req.method,
+      url: req.originalUrl,
+      userAgent: req.get('User-Agent'),
+      ip: req.ip || req.socket.remoteAddress,
+      responseTime: responseTime ? `${responseTime}ms` : undefined,
+      contentLength: req.get('Content-Length'),
+      referrer: req.get('Referrer')
+    };
+
+    this.info('HTTP Request', requestData);
+  }
+
+  logAuth(event: string, email?: string, meta?: Record<string, any>): void {
+    this.winston.info(`Auth: ${event}`, {
+      email,
+      event,
+      category: 'authentication',
+      ...meta
+    });
+  }
+
+  logSecurity(event: string, meta?: Record<string, any>): void {
+    // Security events go to both main log and security-specific log
+    const securityData = {
+      event,
+      category: 'security',
+      severity: 'warning',
+      timestamp: new Date().toISOString(),
+      ...meta
+    };
+
+    this.winston.warn(`Security: ${event}`, securityData);
+    
+    // Also log to security-specific transport
+    this.winston.log('warn', `Security: ${event}`, {
+      ...securityData,
+      label: 'SECURITY'
+    });
+  }
+
+  logPerformance(operation: string, duration: number, meta?: Record<string, any>): void {
+    const performanceData = {
+      operation,
+      duration,
+      category: 'performance',
+      label: 'PERF',
+      ...meta
+    };
+
+    // Log as debug to performance-specific transport
+    this.winston.debug(`Performance: ${operation}`, performanceData);
+  }
+
+  logDatabaseQuery(query: string, duration: number, rows?: number): void {
+    this.logPerformance('database_query', duration, {
+      query: query.substring(0, 100) + (query.length > 100 ? '...' : ''),
+      rows,
+      type: 'database'
+    });
+  }
+
+  logMemoryUsage(usage: NodeJS.MemoryUsage): void {
+    const memoryData = {
+      rss: Math.round(usage.rss / 1024 / 1024),
+      heapTotal: Math.round(usage.heapTotal / 1024 / 1024),
+      heapUsed: Math.round(usage.heapUsed / 1024 / 1024),
+      external: Math.round(usage.external / 1024 / 1024),
+      category: 'system'
+    };
+
+    this.debug('Memory Usage', memoryData);
+  }
+
+  // Log structured errors with stack traces
+  logError(error: Error, context?: string, meta?: Record<string, any>): void {
+    this.error(`${context ? `${context}: ` : ''}${error.message}`, {
+      stack: error.stack,
+      name: error.name,
+      context,
+      ...meta
+    });
+  }
+
+  // Get log statistics
+  getLogStats(): Promise<any> {
+    return new Promise((resolve) => {
+      // Get current log files info
+      const stats = {
+        logDirectory: logDir,
+        transports: this.winston.transports.length,
+        level: this.winston.level,
+        timestamp: new Date().toISOString()
+      };
+      resolve(stats);
+    });
+  }
+
+  // Manual log rotation trigger (for testing)
+  async rotateNow(): Promise<void> {
+    this.winston.transports.forEach((transport) => {
+      if (transport instanceof DailyRotateFile && typeof transport.rotate === 'function') {
+        transport.rotate();
+      }
+    });
+  }
+}
+
+// Export singleton instance
+export const enhancedLogger = EnhancedLogger.getInstance();
+
+// Export for backward compatibility
+export const logger = enhancedLogger;

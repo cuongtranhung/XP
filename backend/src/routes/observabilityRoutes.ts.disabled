@@ -1,0 +1,33 @@
+/**
+ * Observability Routes
+ * 
+ * API endpoints for the Advanced Monitoring & Observability Platform
+ */
+
+import { Router } from 'express';
+import { observabilityController } from '../controllers/observabilityController';
+
+const router = Router();
+
+// Metrics endpoints
+router.get('/metrics', observabilityController.queryMetrics.bind(observabilityController));
+router.post('/metrics', observabilityController.recordMetric.bind(observabilityController));
+
+// Dashboard management endpoints
+router.post('/dashboards', observabilityController.createDashboard.bind(observabilityController));
+router.get('/dashboards/:id', observabilityController.getDashboard.bind(observabilityController));
+router.put('/dashboards/:id', observabilityController.updateDashboard.bind(observabilityController));
+
+// Alert management endpoints
+router.post('/alerts', observabilityController.createAlertCondition.bind(observabilityController));
+
+// SLA monitoring endpoints
+router.get('/sla/:service', observabilityController.getServiceSLA.bind(observabilityController));
+
+// System health endpoints
+router.get('/health', observabilityController.getSystemHealth.bind(observabilityController));
+
+// Tracing endpoints (future implementation)
+router.get('/traces/:id', observabilityController.getTrace.bind(observabilityController));
+
+export default router;

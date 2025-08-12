@@ -1,0 +1,31 @@
+{
+  "issue": "Multiple session expiry warnings on logout",
+  "findings": [
+    {
+      "type": "source-identified",
+      "location": "frontend/src/services/api.ts:71",
+      "description": "Session expiry toast triggered on every 401 response"
+    },
+    {
+      "type": "multiple-warnings",
+      "count": 4,
+      "description": "Multiple 401 responses trigger multiple session expiry warnings"
+    },
+    {
+      "type": "warning-spam",
+      "count": 5,
+      "description": "Rapid API calls after logout create multiple warning messages"
+    },
+    {
+      "type": "root-cause",
+      "description": "API interceptor lacks context awareness for logout vs session expiry scenarios"
+    }
+  ],
+  "recommendations": [
+    "Add logout context flag to prevent session expiry warnings during logout",
+    "Implement toast deduplication to prevent identical messages",
+    "Add delay/debounce to session expiry warnings",
+    "Use different message for logout vs actual session expiry",
+    "Clear any existing session warnings when logout is initiated"
+  ]
+}

@@ -1,0 +1,260 @@
+/**
+ * Enhanced Drag & Drop Styles
+ * Custom CSS for improved drag and drop experience
+ */
+
+/* Enhanced drop zone styles */
+.enhanced-drop-zone {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-width: 2px;
+  border-style: dashed;
+  border-radius: 1rem;
+}
+
+.enhanced-drop-zone.drag-active {
+  border-color: rgb(59 130 246);
+  background-color: rgb(59 130 246 / 0.05);
+  transform: scale(1.02);
+}
+
+.enhanced-drop-zone.hovered {
+  border-color: rgb(37 99 235);
+  background-color: rgb(37 99 235 / 0.1);
+  box-shadow: 0 10px 25px -5px rgb(59 130 246 / 0.25);
+  transform: scale(1.05);
+}
+
+.enhanced-drop-zone.invalid {
+  border-color: rgb(239 68 68);
+  background-color: rgb(239 68 68 / 0.05);
+}
+
+/* Drop zone size variants */
+.enhanced-drop-zone.size-small {
+  min-height: 2rem;
+}
+
+.enhanced-drop-zone.size-medium {
+  min-height: 3rem;
+}
+
+.enhanced-drop-zone.size-large {
+  min-height: 5rem;
+}
+
+/* Mobile optimized drop zones */
+@media (max-width: 768px) {
+  .enhanced-drop-zone.size-small {
+    min-height: 3rem;
+  }
+  
+  .enhanced-drop-zone.size-medium {
+    min-height: 4rem;
+  }
+  
+  .enhanced-drop-zone.size-large {
+    min-height: 6rem;
+  }
+}
+
+/* Drag overlay styles */
+.drag-overlay {
+  pointer-events: none;
+  z-index: 999;
+  transform: rotate(5deg);
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+.drag-overlay.mobile {
+  transform: rotate(3deg) scale(1.1);
+}
+
+/* Field card hover states */
+.field-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.field-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+}
+
+.field-card.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+/* Add button animations */
+.add-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.add-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 14px -2px rgb(59 130 246 / 0.5);
+}
+
+.add-button:active {
+  transform: scale(0.95);
+}
+
+.add-button.expand {
+  animation: expandButton 0.2s ease-out;
+}
+
+@keyframes expandButton {
+  0% {
+    width: 2rem;
+  }
+  100% {
+    width: 5rem;
+  }
+}
+
+/* Drop zone indicator animations */
+.drop-indicator {
+  animation: pulseIndicator 2s ease-in-out infinite;
+}
+
+@keyframes pulseIndicator {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Drag handle styles */
+.drag-handle {
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.field-card:hover .drag-handle {
+  opacity: 1;
+}
+
+/* Border animations */
+.animated-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgb(59 130 246 / 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.animated-border:hover::before {
+  left: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .field-card {
+    padding: 1rem;
+  }
+  
+  .add-button {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .enhanced-drop-zone {
+    margin: 0.5rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .enhanced-drop-zone {
+    border-color: rgb(96 165 250);
+    background-color: rgb(96 165 250 / 0.05);
+  }
+  
+  .enhanced-drop-zone.drag-active {
+    border-color: rgb(129 140 248);
+    background-color: rgb(129 140 248 / 0.1);
+  }
+  
+  .enhanced-drop-zone.hovered {
+    border-color: rgb(165 180 252);
+    background-color: rgb(165 180 252 / 0.15);
+    box-shadow: 0 10px 25px -5px rgb(129 140 248 / 0.3);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .enhanced-drop-zone {
+    border-width: 3px;
+    border-color: rgb(37 99 235);
+  }
+  
+  .enhanced-drop-zone.hovered {
+    border-color: rgb(29 78 216);
+    background-color: rgb(37 99 235 / 0.2);
+  }
+  
+  .add-button {
+    border: 2px solid rgb(37 99 235);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .enhanced-drop-zone,
+  .field-card,
+  .add-button {
+    transition: none;
+    animation: none;
+  }
+  
+  .drop-indicator {
+    animation: none;
+  }
+  
+  .animated-border::before {
+    transition: none;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .enhanced-drop-zone.size-small {
+    min-height: 4rem;
+  }
+  
+  .enhanced-drop-zone.size-medium {
+    min-height: 5rem;
+  }
+  
+  .enhanced-drop-zone.size-large {
+    min-height: 7rem;
+  }
+  
+  .add-button {
+    min-width: 3rem;
+    min-height: 3rem;
+  }
+  
+  .field-card {
+    padding: 1.5rem;
+  }
+}

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Test</title>
+</head>
+<body>
+    <h1>Testing Frontend Access</h1>
+    <p>If you can see this, the frontend server is working.</p>
+    <a href="http://localhost:3000/login">Go to Login Page</a>
+    
+    <script>
+        // Test if we can access the login page
+        fetch('http://localhost:3000/login')
+            .then(response => {
+                console.log('Login page status:', response.status);
+                document.body.innerHTML += '<p>Login page response: ' + response.status + '</p>';
+            })
+            .catch(error => {
+                console.error('Error accessing login page:', error);
+                document.body.innerHTML += '<p>Error: ' + error + '</p>';
+            });
+    </script>
+</body>
+</html>

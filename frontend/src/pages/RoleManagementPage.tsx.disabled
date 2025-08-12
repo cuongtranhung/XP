@@ -1,0 +1,418 @@
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+import {
+  Role,
+  CreateRoleRequest,
+  UpdateRoleRequest,
+  RoleFilters as RoleFiltersType,
+} from '../types/role-management';
+import roleManagementService from '../services/roleManagementService';
+import RoleManagementTable from '../components/role-management/RoleManagementTable';
+import RoleFilters from '../components/role-management/RoleFilters';
+import RoleForm from '../components/role-management/RoleForm';
+import { Plus, Shield, Users, Settings, RefreshCw, Trash2 } from 'lucide-react';
+
+const RoleManagementPage: React.FC = () => {
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<RoleFiltersType>({});
+  const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
+  const [showRoleForm, setShowRoleForm] = useState(false);
+  const [editingRole, setEditingRole] = useState<Role | undefined>(undefined);
+  const [formLoading, setFormLoading] = useState(false);
+  const [healthStatus, setHealthStatus] = useState<'healthy' | 'unhealthy' | 'checking'>('checking');
+
+  // Load roles on component mount and filter changes
+  useEffect(() => {
+    loadRoles();
+  }, [filters]);
+
+  // Check service health on mount
+  useEffect(() => {
+    checkHealth();
+  }, []);
+
+  const checkHealth = async () => {
+    setHealthStatus('checking');
+    try {
+      const result = await roleManagementService.healthCheck();
+      setHealthStatus(result.success ? 'healthy' : 'unhealthy');
+    } catch (error) {
+      console.error('Health check failed:', error);
+      setHealthStatus('unhealthy');
+    }
+  };
+
+  const loadRoles = async () => {
+    try {
+      setLoading(true);
+      const result = await roleManagementService.getAllRoles(filters);
+      
+      if (result.success && result.data) {
+        setRoles(result.data);
+      } else {
+        console.error('Failed to load roles:', result.error);
+        toast.error(result.error || 'Failed to load roles');
+        setRoles([]);
+      }
+    } catch (error) {
+      console.error('Error loading roles:', error);
+      toast.error('Failed to load roles');
+      setRoles([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFiltersChange = (newFilters: RoleFiltersType) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+  };
+
+  const handleCreateRole = () => {
+    setEditingRole(undefined);
+    setShowRoleForm(true);
+  };
+
+  const handleEditRole = (role: Role) => {
+    setEditingRole(role);
+    setShowRoleForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowRoleForm(false);
+    setEditingRole(undefined);
+  };
+
+  const handleFormSubmit = async (data: CreateRoleRequest | UpdateRoleRequest) => {
+    try {
+      setFormLoading(true);
+      let result;
+
+      if (editingRole) {
+        // Update existing role
+        result = await roleManagementService.updateRole(editingRole.id, data as UpdateRoleRequest);
+      } else {
+        // Create new role
+        result = await roleManagementService.createRole(data as CreateRoleRequest);
+      }
+
+      if (result.success) {
+        toast.success(result.message || `Role ${editingRole ? 'updated' : 'created'} successfully`);
+        handleCloseForm();
+        await loadRoles(); // Reload the roles list
+      } else {
+        toast.error(result.error || `Failed to ${editingRole ? 'update' : 'create'} role`);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast.error(`Failed to ${editingRole ? 'update' : 'create'} role`);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleDeleteRole = async (roleId: string) => {
+    const role = roles.find(r => r.id === roleId);
+    if (!role) return;
+
+    if (role.is_system) {
+      toast.error('System roles cannot be deleted');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete the role "${role.display_name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const result = await roleManagementService.deleteRole(roleId);
+      
+      if (result.success) {
+        toast.success(result.message || 'Role deleted successfully');
+        await loadRoles(); // Reload the roles list
+        // Remove from selected if it was selected
+        setSelectedRoles(prev => {
+          const newSelected = new Set(prev);
+          newSelected.delete(roleId);
+          return newSelected;
+        });
+      } else {
+        toast.error(result.error || 'Failed to delete role');
+      }
+    } catch (error) {
+      console.error('Error deleting role:', error);
+      toast.error('Failed to delete role');
+    }
+  };
+
+  const handleViewUsers = (role: Role) => {
+    // TODO: Implement user list modal for this role
+    toast.info(`Viewing users for role: ${role.display_name}`);
+    console.log('View users for role:', role);
+  };
+
+  const handleRoleSelect = (roleId: string, selected: boolean) => {
+    setSelectedRoles(prev => {
+      const newSelected = new Set(prev);
+      if (selected) {
+        newSelected.add(roleId);
+      } else {
+        newSelected.delete(roleId);
+      }
+      return newSelected;
+    });
+  };
+
+  const handleSelectAll = (selected: boolean) => {
+    if (selected) {
+      setSelectedRoles(new Set(roles.filter(role => !role.is_system).map(role => role.id)));
+    } else {
+      setSelectedRoles(new Set());
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const selectedRolesList = roles.filter(role => selectedRoles.has(role.id));
+    const systemRoles = selectedRolesList.filter(role => role.is_system);
+    
+    if (systemRoles.length > 0) {
+      toast.error('Cannot delete system roles');
+      return;
+    }
+
+    if (selectedRolesList.length === 0) {
+      toast.error('No roles selected');
+      return;
+    }
+
+    const roleNames = selectedRolesList.map(role => role.display_name).join(', ');
+    if (!window.confirm(`Are you sure you want to delete ${selectedRolesList.length} role(s): ${roleNames}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const deletePromises = selectedRolesList.map(role => 
+        roleManagementService.deleteRole(role.id)
+      );
+      
+      const results = await Promise.allSettled(deletePromises);
+      const failures = results.filter(result => 
+        result.status === 'rejected' || 
+        (result.status === 'fulfilled' && !result.value.success)
+      );
+
+      if (failures.length === 0) {
+        toast.success(`Successfully deleted ${selectedRolesList.length} role(s)`);
+        setSelectedRoles(new Set());
+        await loadRoles();
+      } else {
+        toast.error(`${failures.length} role(s) failed to delete`);
+        await loadRoles(); // Refresh to show current state
+      }
+    } catch (error) {
+      console.error('Bulk delete error:', error);
+      toast.error('Failed to delete selected roles');
+    }
+  };
+
+  const getHealthStatusColor = () => {
+    switch (healthStatus) {
+      case 'healthy': return 'text-green-600';
+      case 'unhealthy': return 'text-red-600';
+      case 'checking': return 'text-yellow-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const getHealthStatusText = () => {
+    switch (healthStatus) {
+      case 'healthy': return 'Service Online';
+      case 'unhealthy': return 'Service Offline';
+      case 'checking': return 'Checking...';
+      default: return 'Unknown';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+              <Shield className="h-8 w-8 mr-3 text-blue-600" />
+              Role Management
+            </h1>
+            <p className="mt-1 text-sm text-gray-600">
+              Manage system roles and permissions
+            </p>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            {/* Health Status */}
+            <div className="flex items-center text-sm">
+              <div className={`w-2 h-2 rounded-full mr-2 ${
+                healthStatus === 'healthy' ? 'bg-green-500' :
+                healthStatus === 'unhealthy' ? 'bg-red-500' : 'bg-yellow-500'
+              }`}></div>
+              <span className={getHealthStatusColor()}>
+                {getHealthStatusText()}
+              </span>
+            </div>
+
+            <button
+              onClick={loadRoles}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            
+            <button
+              onClick={handleCreateRole}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Role
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Shield className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">Total Roles</dt>
+                    <dd className="text-lg font-medium text-gray-900">{roles.length}</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Settings className="h-6 w-6 text-green-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">Active Roles</dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {roles.filter(role => role.is_active).length}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Users className="h-6 w-6 text-blue-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">Custom Roles</dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {roles.filter(role => !role.is_system).length}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Settings className="h-6 w-6 text-red-400" />
+                </div>
+                <div className="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt className="text-sm font-medium text-gray-500 truncate">System Roles</dt>
+                    <dd className="text-lg font-medium text-gray-900">
+                      {roles.filter(role => role.is_system).length}
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <RoleFilters
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          onClearFilters={handleClearFilters}
+        />
+
+        {/* Bulk Actions */}
+        {selectedRoles.size > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Users className="h-5 w-5 text-blue-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-blue-800">
+                    {selectedRoles.size} role(s) selected
+                  </h3>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleBulkDelete}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Selected
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Role Table */}
+        <RoleManagementTable
+          roles={roles}
+          loading={loading}
+          onEditRole={handleEditRole}
+          onDeleteRole={handleDeleteRole}
+          onViewUsers={handleViewUsers}
+          selectedRoles={selectedRoles}
+          onRoleSelect={handleRoleSelect}
+          onSelectAll={handleSelectAll}
+        />
+
+        {/* Role Form Modal */}
+        <RoleForm
+          role={editingRole}
+          isOpen={showRoleForm}
+          onClose={handleCloseForm}
+          onSubmit={handleFormSubmit}
+          loading={formLoading}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default RoleManagementPage;

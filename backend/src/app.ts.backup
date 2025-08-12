@@ -1,0 +1,249 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+const compression = require('compression');
+import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes';
+import sessionRoutes from './routes/sessionRoutes';
+import healthRoutes from './routes/health';
+import activityControlRoutes from './routes/activityControlRoutes';
+import activityRoutes from './routes/activityRoutes';
+// import locationRoutes from './routes/locationRoutes';
+// import { testConnection } from './utils/database'; // Commented out - not used
+import { logger } from './utils/logger';
+import { minimalActivityMiddleware } from './services/minimalActivityLogger';
+// import { SessionCleanupService } from './services/sessionCleanupService'; // Commented out - not used
+
+// GPS Module imports
+import { gpsModuleRoutes } from './modules/gpsModule';
+
+// User Management Module imports
+import userManagementRoutes from './modules/user-management/routes';
+
+// Permission Routes
+import permissionRoutes from './routes/permissionRoutes';
+
+// Dynamic Form Builder Module imports
+// import { dynamicFormBuilderModule } from './modules/dynamicFormBuilder'; // Commented out - not used
+import dynamicFormRoutes from './modules/dynamicFormBuilder/routes/formRoutes';
+import submissionRoutes from './modules/dynamicFormBuilder/routes/submissionRoutes';
+import submissionCommentRoutes from './modules/dynamicFormBuilder/routes/commentRoutes';
+import uploadRoutes from './modules/dynamicFormBuilder/routes/uploadRoutes';
+
+// Comment System Module imports
+import commentRoutes from './modules/comments/comment.routes';
+// WebSocket service is initialized in server.ts with the HTTP server instance
+
+// Upload Module imports
+// const uploadRoutesR2 = require('./routes/upload.routes'); // Temporarily disabled due to auth middleware issue
+
+// MEGA S4 Upload Module imports
+import megaS4Routes from './routes/megaS4Routes';
+
+// Load environment variables
+dotenv.config();
+
+const app = express();
+// const PORT = process.env.PORT || 5000; // Not used here, used in server.ts
+
+// Security middleware
+app.use(helmet({
+  crossOriginEmbedderPolicy: false, // Allow embedding for development
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
+
+// CORS configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL ?? 'http://localhost:3000',
+  ...(process.env.NODE_ENV === 'development' ? [
+    'http://localhost:3001',
+    'http://localhost:3002', 
+    'http://localhost:3003',
+    'http://172.26.249.148:3000', // WSL2 IP access
+    'http://172.26.249.148:3001',
+    'http://10.255.255.254:3000', // Alternative WSL2 IP
+    'http://10.255.255.254:3001'
+  ] : [])
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  optionsSuccessStatus: 200, // Support legacy browsers
+}));
+
+// Compression middleware - compress all responses over 1KB
+app.use(compression({
+  level: 6, // Balanced compression level (1-9, default is 6)
+  threshold: 1024, // Only compress responses larger than 1KB
+  filter: (req: any, res: any) => {
+    // Don't compress if client doesn't support it
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    // Use compression's default filter
+    return compression.filter(req, res);
+  }
+}));
+
+// Body parsing middleware with size limits
+app.use(express.json({ 
+  limit: '10mb',
+  strict: true,
+  type: 'application/json'
+}));
+app.use(express.urlencoded({ 
+  extended: true,
+  limit: '10mb',
+  parameterLimit: 100
+}));
+
+// Request timing middleware (for activity logging)
+app.use((req, _res, next) => {
+  req.startTime = Date.now();
+  next();
+});
+
+// Request logging middleware
+app.use((req, _res, next) => {
+  logger.info('HTTP Request', {
+    method: req.method,
+    path: req.path,
+    ip: req.ip,
+    userAgent: req.get('User-Agent')
+  });
+  next();
+});
+
+// Minimal activity logging middleware (optional)
+if (process.env.ACTIVITY_LOGGING_ENABLED !== 'false') {
+  app.use(minimalActivityMiddleware);
+}
+
+// Routes
+app.use('/api/auth', authRoutes);
+
+// Add test auth route for Playwright testing
+import testAuthRoute from './routes/testAuthRoute';
+app.use('/api/auth', testAuthRoute);
+
+app.use('/api/sessions', sessionRoutes);
+app.use('/api/activity-control', activityControlRoutes);
+app.use('/api/activity', activityRoutes);
+// app.use('/api/location', locationRoutes); // Replaced by GPS module
+app.use('/health', healthRoutes);
+app.use('/api/health', healthRoutes); // Add standard API health endpoint
+
+// GPS Module routes (conditional loading)
+app.use('/api/gps-module', gpsModuleRoutes);
+
+// Temporary forms test route
+app.get('/api/forms-test', (_req, res) => {
+  res.json({
+    success: true,
+    data: {
+      forms: [],
+      pagination: { page: 1, limit: 20, total: 0, pages: 1, hasNext: false, hasPrev: false }
+    }
+  });
+});
+
+// Dynamic Form Builder Module routes
+app.use('/api/forms', dynamicFormRoutes);
+app.use('/api/forms', submissionRoutes);
+app.use('/api/submissions', submissionCommentRoutes);
+app.use('/api/forms', uploadRoutes);
+
+// Comment System routes
+app.use('/api/comments', commentRoutes);
+
+// Upload Module routes (Cloudflare R2)
+// app.use('/api/upload', uploadRoutesR2); // Temporarily disabled due to auth middleware issue
+
+// MEGA S4 Upload Module routes
+app.use('/api/mega-s4', megaS4Routes);
+
+// User Management Module routes
+app.use('/api/user-management', userManagementRoutes);
+
+// Permission Routes
+app.use('/api/permissions', permissionRoutes);
+
+// Form Builder Metrics endpoint (if monitoring is enabled)
+if (process.env.MONITORING_ENABLED !== 'false') {
+  app.get('/api/formbuilder/metrics', async (_req, res) => {
+    try {
+      const { metricsHandler } = await import('./modules/dynamicFormBuilder/monitoring');
+      await metricsHandler(_req, res);
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Metrics not available' });
+    }
+  });
+}
+
+// Performance middleware for static endpoints
+app.use('/', (req, res, next) => {
+  if (req.method === 'GET' && (req.path === '/' || req.path === '/health')) {
+    res.set('Cache-Control', 'public, max-age=300'); // 5 minutes cache
+  }
+  next();
+});
+
+// Root endpoint with enhanced metadata
+app.get('/', (_req, res) => {
+  res.json({ 
+    message: 'Fullstack Authentication API',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV ?? 'development',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/health',
+      database: '/health/database',
+      auth: '/api/auth',
+      sessions: '/api/sessions',
+      activityControl: '/api/activity-control',
+      gpsModule: '/api/gps-module',
+      forms: '/api/forms',
+      userManagement: '/api/user-management'
+    },
+    features: {
+      activityLogging: process.env.ACTIVITY_LOGGING_ENABLED !== 'false',
+      sessionManagement: true,
+      deviceFingerprinting: process.env.ENABLE_DEVICE_FINGERPRINTING !== 'false',
+      sessionRotation: process.env.ENABLE_SESSION_ROTATION !== 'false',
+      rateLimiting: true,
+      cors: true,
+      helmet: true,
+      compression: true
+    }
+  });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    success: false,
+    message: `Route ${req.originalUrl} not found` 
+  });
+});
+
+// Error handler
+app.use((error: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error('Unhandled application error', { error: error.message, stack: error.stack });
+  res.status(error.status || 500).json({
+    success: false,
+    message: error.message || 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+  });
+});
+
+// Note: Server startup and module initialization is handled in server.ts
+
+export default app;

@@ -1,0 +1,547 @@
+
+> fullstack-auth-e2e@1.0.0 test
+> playwright test --grep should show validation errors for empty form submission --reporter=json
+
+{
+  "config": {
+    "configFile": "/mnt/c/Users/Admin/source/repos/XP/e2e/playwright.config.ts",
+    "rootDir": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 6
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.54.2",
+    "workers": 6,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "signup-improved.spec.ts",
+      "file": "signup-improved.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Registration Feature - Improved",
+          "file": "signup-improved.spec.ts",
+          "line": 14,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should show validation errors for empty form submission",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 6368,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n    at RegisterPage.waitForValidationErrors (/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts:136:21)\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup-improved.spec.ts:31:24",
+                        "location": {
+                          "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts",
+                          "column": 21,
+                          "line": 136
+                        },
+                        "snippet": "\u001b[90m   at \u001b[39m../pages/RegisterPage.ts:136\n\n  134 |    */\n  135 |   async waitForValidationErrors(): Promise<void> {\n> 136 |     await this.page.waitForSelector('.text-red-600', { timeout: 5000 });\n      |                     ^\n  137 |   }\n  138 |   \n  139 |   /**"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts",
+                            "column": 21,
+                            "line": 136
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n\n   at ../pages/RegisterPage.ts:136\n\n  134 |    */\n  135 |   async waitForValidationErrors(): Promise<void> {\n> 136 |     await this.page.waitForSelector('.text-red-600', { timeout: 5000 });\n      |                     ^\n  137 |   }\n  138 |   \n  139 |   /**\n    at RegisterPage.waitForValidationErrors (/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts:136:21)\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup-improved.spec.ts:31:24"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-01T20:33:20.904Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-improved-Registrati-4dc80-s-for-empty-form-submission-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-improved-Registrati-4dc80-s-for-empty-form-submission-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts",
+                        "column": 21,
+                        "line": 136
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e977c56bfeeb3cbb89ca-776de5eee971fb9297bb",
+              "file": "signup-improved.spec.ts",
+              "line": 26,
+              "column": 7
+            },
+            {
+              "title": "should show validation errors for empty form submission",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 10100,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n    at RegisterPage.waitForValidationErrors (/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts:136:21)\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup-improved.spec.ts:31:24",
+                        "location": {
+                          "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts",
+                          "column": 21,
+                          "line": 136
+                        },
+                        "snippet": "\u001b[90m   at \u001b[39m../pages/RegisterPage.ts:136\n\n  134 |    */\n  135 |   async waitForValidationErrors(): Promise<void> {\n> 136 |     await this.page.waitForSelector('.text-red-600', { timeout: 5000 });\n      |                     ^\n  137 |   }\n  138 |   \n  139 |   /**"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts",
+                            "column": 21,
+                            "line": 136
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n\n   at ../pages/RegisterPage.ts:136\n\n  134 |    */\n  135 |   async waitForValidationErrors(): Promise<void> {\n> 136 |     await this.page.waitForSelector('.text-red-600', { timeout: 5000 });\n      |                     ^\n  137 |   }\n  138 |   \n  139 |   /**\n    at RegisterPage.waitForValidationErrors (/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts:136:21)\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup-improved.spec.ts:31:24"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-01T20:33:20.971Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-improved-Registrati-4dc80-s-for-empty-form-submission-firefox/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-improved-Registrati-4dc80-s-for-empty-form-submission-firefox/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts",
+                        "column": 21,
+                        "line": 136
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e977c56bfeeb3cbb89ca-d5e4aaba166da95d0638",
+              "file": "signup-improved.spec.ts",
+              "line": 26,
+              "column": 7
+            },
+            {
+              "title": "should show validation errors for empty form submission",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
+                      "status": "failed",
+                      "duration": 9064,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n    at RegisterPage.waitForValidationErrors (/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts:136:21)\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup-improved.spec.ts:31:24",
+                        "location": {
+                          "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts",
+                          "column": 21,
+                          "line": 136
+                        },
+                        "snippet": "\u001b[90m   at \u001b[39m../pages/RegisterPage.ts:136\n\n  134 |    */\n  135 |   async waitForValidationErrors(): Promise<void> {\n> 136 |     await this.page.waitForSelector('.text-red-600', { timeout: 5000 });\n      |                     ^\n  137 |   }\n  138 |   \n  139 |   /**"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts",
+                            "column": 21,
+                            "line": 136
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n\n   at ../pages/RegisterPage.ts:136\n\n  134 |    */\n  135 |   async waitForValidationErrors(): Promise<void> {\n> 136 |     await this.page.waitForSelector('.text-red-600', { timeout: 5000 });\n      |                     ^\n  137 |   }\n  138 |   \n  139 |   /**\n    at RegisterPage.waitForValidationErrors (/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts:136:21)\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup-improved.spec.ts:31:24"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-01T20:33:22.819Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-improved-Registrati-4dc80-s-for-empty-form-submission-webkit/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-improved-Registrati-4dc80-s-for-empty-form-submission-webkit/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/pages/RegisterPage.ts",
+                        "column": 21,
+                        "line": 136
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e977c56bfeeb3cbb89ca-184147fa8666aef46dc5",
+              "file": "signup-improved.spec.ts",
+              "line": 26,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "signup.spec.ts",
+      "file": "signup.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Signup Feature Tests",
+          "file": "signup.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should show validation errors for empty form submission",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 6683,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts:36:16",
+                        "location": {
+                          "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts",
+                          "column": 16,
+                          "line": 36
+                        },
+                        "snippet": "  34 |     \n  35 |     // Wait for validation to trigger\n> 36 |     await page.waitForSelector('.text-red-600', { timeout: 5000 });\n     |                ^\n  37 |     \n  38 |     // Should show validation errors - using exact error messages from validation schema\n  39 |     await expect(page.getByText('Full name is required')).toBeVisible();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts",
+                            "column": 16,
+                            "line": 36
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n\n  34 |     \n  35 |     // Wait for validation to trigger\n> 36 |     await page.waitForSelector('.text-red-600', { timeout: 5000 });\n     |                ^\n  37 |     \n  38 |     // Should show validation errors - using exact error messages from validation schema\n  39 |     await expect(page.getByText('Full name is required')).toBeVisible();\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts:36:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-01T20:33:24.102Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-Signup-Feature-Test-8b266-s-for-empty-form-submission-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-Signup-Feature-Test-8b266-s-for-empty-form-submission-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts",
+                        "column": 16,
+                        "line": 36
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e5334e3b62ca8fd4a4b6-c901407ab719c0b98a4c",
+              "file": "signup.spec.ts",
+              "line": 31,
+              "column": 7
+            },
+            {
+              "title": "should show validation errors for empty form submission",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 10029,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts:36:16",
+                        "location": {
+                          "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts",
+                          "column": 16,
+                          "line": 36
+                        },
+                        "snippet": "  34 |     \n  35 |     // Wait for validation to trigger\n> 36 |     await page.waitForSelector('.text-red-600', { timeout: 5000 });\n     |                ^\n  37 |     \n  38 |     // Should show validation errors - using exact error messages from validation schema\n  39 |     await expect(page.getByText('Full name is required')).toBeVisible();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts",
+                            "column": 16,
+                            "line": 36
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n\n  34 |     \n  35 |     // Wait for validation to trigger\n> 36 |     await page.waitForSelector('.text-red-600', { timeout: 5000 });\n     |                ^\n  37 |     \n  38 |     // Should show validation errors - using exact error messages from validation schema\n  39 |     await expect(page.getByText('Full name is required')).toBeVisible();\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts:36:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-01T20:33:20.944Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-Signup-Feature-Test-8b266-s-for-empty-form-submission-firefox/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-Signup-Feature-Test-8b266-s-for-empty-form-submission-firefox/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts",
+                        "column": 16,
+                        "line": 36
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e5334e3b62ca8fd4a4b6-9a5ca6120e754493db79",
+              "file": "signup.spec.ts",
+              "line": 31,
+              "column": 7
+            },
+            {
+              "title": "should show validation errors for empty form submission",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
+                      "status": "failed",
+                      "duration": 9063,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts:36:16",
+                        "location": {
+                          "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts",
+                          "column": 16,
+                          "line": 36
+                        },
+                        "snippet": "  34 |     \n  35 |     // Wait for validation to trigger\n> 36 |     await page.waitForSelector('.text-red-600', { timeout: 5000 });\n     |                ^\n  37 |     \n  38 |     // Should show validation errors - using exact error messages from validation schema\n  39 |     await expect(page.getByText('Full name is required')).toBeVisible();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts",
+                            "column": 16,
+                            "line": 36
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.text-red-600') to be visible\u001b[22m\n\n\n  34 |     \n  35 |     // Wait for validation to trigger\n> 36 |     await page.waitForSelector('.text-red-600', { timeout: 5000 });\n     |                ^\n  37 |     \n  38 |     // Should show validation errors - using exact error messages from validation schema\n  39 |     await expect(page.getByText('Full name is required')).toBeVisible();\n    at /mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts:36:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-01T20:33:20.870Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-Signup-Feature-Test-8b266-s-for-empty-form-submission-webkit/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/mnt/c/Users/Admin/source/repos/XP/e2e/test-results/signup-Signup-Feature-Test-8b266-s-for-empty-form-submission-webkit/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/mnt/c/Users/Admin/source/repos/XP/e2e/tests/signup.spec.ts",
+                        "column": 16,
+                        "line": 36
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "e5334e3b62ca8fd4a4b6-7d07c977286081f75746",
+              "file": "signup.spec.ts",
+              "line": 31,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-08-01T20:33:15.274Z",
+    "duration": 19529.244,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 6,
+    "flaky": 0
+  }
+}

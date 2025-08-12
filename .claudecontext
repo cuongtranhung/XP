@@ -1,0 +1,150 @@
+# CLAUDE CODE - CONTEXT LOADER
+# This file is automatically read by Claude Code on session start
+
+## 🚀 INSTANT CONTEXT LOADING
+
+🤖 CLAUDE: READ CLAUDE_AUTO_START.md IMMEDIATELY FOR FULL PROJECT CONTEXT
+
+The file CLAUDE_AUTO_START.md contains everything you need to understand this project instantly.
+
+## 📚 ADDITIONAL RESOURCES (if needed)
+- CLAUDE.md - Detailed AI instructions
+- docs/CLAUDE_VALIDATION_CHECKLIST.md - Quality checklist  
+- docs/DOCUMENTATION_COMPLIANCE_RULES_VN.md - Comprehensive rules
+- COMPLETE_PROJECT_INDEX.md - Full project overview
+
+## 📋 PROJECT ESSENTIALS
+
+PROJECT_NAME="XP - Fullstack Authentication System"
+PROJECT_TYPE="Monorepo (React + Node.js + PostgreSQL)"
+VERSION="1.0.0"
+DOCUMENTATION_STANDARD="XP_DOCS_V1"
+
+## 🏗️ ARCHITECTURE OVERVIEW
+
+FRONTEND="React 18.2 + TypeScript 5.7 + Vite 6.0 + Tailwind CSS"
+BACKEND="Node.js 18+ + Express 4.18 + TypeScript 5.9 + PostgreSQL"
+TESTING="Jest + Playwright + ESLint + Prettier"
+
+## 📂 KEY DIRECTORIES
+
+- `/docs/` - Main documentation (10 categories)
+- `/backend/src/` - Node.js API server
+- `/frontend/src/` - React TypeScript SPA
+- `/e2e/` - End-to-end tests
+- `/migrations/` - Database migrations
+
+## 📝 DOCUMENTATION RULES (CRITICAL)
+
+LANGUAGE_TECH="English only for technical docs"
+LANGUAGE_USER="Bilingual EN/VN for user guides"
+FORMAT="Markdown with metadata headers"
+NAMING="kebab-case.md ([category]-[topic]-[subtopic].md)"
+LOCATION="Organized in /docs/01-10 numbered categories"
+
+TEMPLATES_AVAILABLE:
+- Feature: Use for new features/modules
+- API: Use for endpoints documentation  
+- Guide: Use for user instructions
+- Troubleshooting: Use for problem-solving
+
+SECURITY_RULES:
+- NEVER include passwords, API keys, tokens
+- NEVER expose internal URLs or IPs  
+- NEVER include real user data
+- ALWAYS sanitize examples
+- ALWAYS add security warnings
+
+## 🔄 WORKFLOW REQUIREMENTS
+
+BEFORE_DOCUMENTING:
+1. Read existing related docs
+2. Choose correct template
+3. Verify correct location
+4. Test code examples
+5. Check security implications
+
+VALIDATION_REQUIRED:
+- Metadata header complete
+- Code examples tested
+- Links functional
+- Security reviewed
+- Proper integration
+
+COMMIT_FORMAT="docs: [action] [scope] - [description]"
+
+## ⚠️ CRITICAL WARNINGS
+
+NEVER_DO:
+- Delete documentation without explicit permission
+- Change core structure without approval
+- Mix languages inappropriately  
+- Create duplicate documentation
+- Include sensitive information
+- Skip testing of code examples
+
+ALWAYS_DO:
+- Follow established templates
+- Include metadata headers
+- Test all code examples
+- Update related documentation
+- Maintain consistent formatting
+- Cross-reference related docs
+
+## 📊 QUALITY STANDARDS
+
+TARGET_METRICS:
+- Completeness: 95%+
+- Accuracy: 100% (all examples must work)
+- Currency: Updated within 48h of code changes
+- Coverage: 90%+ use cases documented
+
+## 🎯 CURRENT FOCUS AREAS (2025)
+
+ACTIVE_INITIATIVES:
+1. Performance Optimization
+2. TypeScript 5.7 Migration  
+3. User Activity Logging Enhancement
+4. Form Builder UX Improvements
+5. Real-time Communication Optimization
+
+## 📞 QUICK REFERENCE
+
+MAIN_DOCS="/docs/README.md"
+PROJECT_INDEX="/COMPLETE_PROJECT_INDEX.md"
+CLAUDE_GUIDE="/CLAUDE.md"
+VALIDATION="/docs/CLAUDE_VALIDATION_CHECKLIST.md"
+
+## 🔗 INTEGRATION POINTS
+
+- Frontend dev server: http://localhost:3000
+- Backend API: http://localhost:5000  
+- Database: PostgreSQL
+- File storage: Mage S4
+- Real-time: Socket.IO
+- Email: SendGrid
+
+---
+
+## AUTO-LOAD SEQUENCE
+
+When Claude starts a new session, it should:
+
+1. Read this .claudecontext file first
+2. Load CLAUDE.md for detailed instructions  
+3. Review recent changes in project
+4. Check for any pending documentation tasks
+5. Understand current development status
+
+## SESSION MEMORY PERSISTENCE
+
+Previous session context should be preserved in:
+- /coordination/memory_bank/ - Long-term project memory
+- /memory/sessions/ - Session-specific memory
+- /coordination/subtasks/ - Ongoing task memory
+
+---
+
+LAST_UPDATED="2025-01-10"
+CONTEXT_VERSION="1.0.0"
+MAINTAINED_BY="XP Development Team"

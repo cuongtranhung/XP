@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # Redis Master Instance
+  redis-master:
+    image: redis:7.2-alpine
+    container_name: xp-redis-master
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      - xp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+  # Redis Sentinel for High Availability
+  redis-sentinel-1:
+    image: redis:7.2-alpine
+    container_name: xp-redis-sentinel-1
+    ports:
+      - "26379:26379"
+    volumes:
+      - ./redis/sentinel-1.conf:/etc/redis/sentinel.conf
+    command: redis-sentinel /etc/redis/sentinel.conf
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    networks:
+      - xp-network
+    restart: unless-stopped
+
+  redis-sentinel-2:
+    image: redis:7.2-alpine
+    container_name: xp-redis-sentinel-2
+    ports:
+      - "26380:26379"
+    volumes:
+      - ./redis/sentinel-2.conf:/etc/redis/sentinel.conf
+    command: redis-sentinel /etc/redis/sentinel.conf
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    networks:
+      - xp-network
+    restart: unless-stopped
+
+  # Redis Commander for UI Management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: xp-redis-ui
+    environment:
+      - REDIS_HOSTS=master:redis-master:6379
+      - HTTP_USER=admin
+      - HTTP_PASSWORD=admin123
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis-master
+    networks:
+      - xp-network
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+    driver: local
+    name: xp-redis-data
+
+networks:
+  xp-network:
+    driver: bridge
+    name: xp-network

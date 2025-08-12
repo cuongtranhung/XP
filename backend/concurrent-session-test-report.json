@@ -1,0 +1,28 @@
+{
+  "totalAttempts": 5,
+  "successfulLogins": 0,
+  "concurrentSessions": 0,
+  "sessionDetails": [],
+  "errors": [
+    {
+      "ip": "192.168.1.100",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "ip": "10.0.0.50",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "ip": "172.16.0.25",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "ip": "203.113.14.75",
+      "error": "Request failed with status code 401"
+    },
+    {
+      "ip": "8.8.8.8",
+      "error": "Request failed with status code 401"
+    }
+  ]
+}

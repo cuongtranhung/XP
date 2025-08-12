@@ -1,0 +1,341 @@
+/* Gallery v2.0 - Modern UI with Glassmorphism & Advanced Effects */
+
+.galleryV2 {
+  --bg-overlay: rgba(10, 10, 20, 0.95);
+  --bg-glass: rgba(255, 255, 255, 0.08);
+  --bg-glass-hover: rgba(255, 255, 255, 0.12);
+  --border-glass: rgba(255, 255, 255, 0.18);
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.75);
+  
+  /* Modern gradient colors */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-success: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  
+  /* Shadows with color */
+  --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.4);
+  --shadow-elevated: 0 20px 40px rgba(0, 0, 0, 0.3);
+  --shadow-subtle: 0 2px 20px rgba(0, 0, 0, 0.1);
+  
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Backdrop with animated gradient */
+.backdropV2 {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(40px) saturate(150%);
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
+  cursor: zoom-out;
+  animation: backdropFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(40px);
+  }
+}
+
+/* Glass morphism panels */
+.glassPanel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-glass);
+  border-radius: 20px;
+  box-shadow: var(--shadow-elevated);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glassPanel:hover {
+  background: var(--bg-glass-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Modern control buttons */
+.controlButtonV2 {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.controlButtonV2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.controlButtonV2:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.controlButtonV2:hover::before {
+  opacity: 0.1;
+}
+
+.controlButtonV2:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Floating Action Buttons (FAB) style */
+.fabButton {
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background: var(--gradient-primary);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  border: none;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fabButton:hover {
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+}
+
+/* Navigation arrows with glass effect */
+.navButtonV2 {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 96px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.navButtonV2.prev {
+  left: 20px;
+  border-radius: 0 48px 48px 0;
+}
+
+.navButtonV2.next {
+  right: 20px;
+  border-radius: 48px 0 0 48px;
+}
+
+.navButtonV2:hover {
+  background: var(--bg-glass-hover);
+  width: 56px;
+}
+
+/* Image container with smooth transitions */
+.imageContainerV2 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+.imageV2 {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: var(--shadow-elevated);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Thumbnails with modern style */
+.thumbnailsV2 {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: 20px;
+  max-width: 80%;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.thumbnailV2 {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  position: relative;
+}
+
+.thumbnailV2 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnailV2:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.thumbnailV2.active {
+  border-color: #667eea;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+}
+
+.thumbnailV2.active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(102, 126, 234, 0.3));
+  pointer-events: none;
+}
+
+/* Loading state with modern spinner */
+.loadingV2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+}
+
+.spinnerV2 {
+  width: 100%;
+  height: 100%;
+  border: 3px solid var(--border-glass);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+  .controlButtonV2 {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .fabButton {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .navButtonV2 {
+    width: 40px;
+    height: 80px;
+  }
+  
+  .thumbnailsV2 {
+    bottom: 100px;
+    max-width: 90%;
+  }
+  
+  .thumbnailV2 {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Accessibility - High contrast mode */
+@media (prefers-contrast: high) {
+  .galleryV2 {
+    --bg-glass: rgba(0, 0, 0, 0.9);
+    --border-glass: rgba(255, 255, 255, 0.5);
+  }
+  
+  .controlButtonV2,
+  .navButtonV2 {
+    border-width: 2px;
+  }
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .galleryV2 *,
+  .galleryV2 *::before,
+  .galleryV2 *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+.controlButtonV2:focus-visible,
+.navButtonV2:focus-visible,
+.thumbnailV2:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Smooth scrollbar styling */
+.thumbnailsV2::-webkit-scrollbar {
+  height: 6px;
+}
+
+.thumbnailsV2::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thumbnailsV2::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.thumbnailsV2::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}

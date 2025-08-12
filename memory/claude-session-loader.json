@@ -1,0 +1,201 @@
+{
+  "sessionLoader": {
+    "version": "1.0.0",
+    "purpose": "Automatic context loading for Claude Code sessions",
+    "lastUpdated": "2025-01-10",
+    "autoLoad": {
+      "enabled": true,
+      "priority": [
+        ".claudecontext",
+        "CLAUDE.md", 
+        "docs/DOCUMENTATION_COMPLIANCE_RULES_VN.md",
+        "docs/CLAUDE_VALIDATION_CHECKLIST.md",
+        "COMPLETE_PROJECT_INDEX.md"
+      ]
+    }
+  },
+  "projectContext": {
+    "name": "XP - Fullstack Authentication System",
+    "type": "Monorepo",
+    "architecture": "React + Node.js + PostgreSQL",
+    "currentVersion": "1.0.0",
+    "developmentStatus": "Active",
+    "lastContextUpdate": "2025-01-10"
+  },
+  "documentationStandards": {
+    "complianceVersion": "XP_DOCS_V1.0",
+    "languagePolicy": {
+      "technical": "English",
+      "userGuides": ["English", "Vietnamese"],
+      "codeComments": "English"
+    },
+    "formatRequirements": {
+      "markdown": true,
+      "metadataHeaders": true,
+      "namingConvention": "kebab-case",
+      "directoryStructure": "numbered-categories",
+      "templateUsage": "mandatory"
+    },
+    "qualityStandards": {
+      "completeness": 0.95,
+      "accuracy": 1.0,
+      "testExamples": true,
+      "securityReview": true
+    }
+  },
+  "securityGuidelines": {
+    "forbidden": [
+      "passwords",
+      "apiKeys", 
+      "tokens",
+      "internalUrls",
+      "userData",
+      "credentials"
+    ],
+    "required": [
+      "sanitizedExamples",
+      "securityWarnings",
+      "bestPractices",
+      "authenticationDocs"
+    ]
+  },
+  "currentFocus": {
+    "initiatives": [
+      "Performance Optimization",
+      "TypeScript 5.7 Migration",
+      "User Activity Logging Enhancement", 
+      "Form Builder UX Improvements",
+      "Real-time Communication Optimization"
+    ],
+    "technicalDebt": [
+      "Documentation consistency",
+      "Code example validation",
+      "Cross-reference maintenance"
+    ]
+  },
+  "memoryPersistence": {
+    "enabled": true,
+    "locations": {
+      "projectMemory": "/coordination/memory_bank/",
+      "sessionMemory": "/memory/sessions/",
+      "taskMemory": "/coordination/subtasks/"
+    },
+    "retentionPolicy": {
+      "sessions": "30 days",
+      "projects": "permanent",
+      "tasks": "until_completion"
+    }
+  },
+  "automationRules": {
+    "documentationTriggers": {
+      "codeChange": {
+        "action": "update_related_docs",
+        "timeout": "48h"
+      },
+      "newFeature": {
+        "action": "create_feature_docs",
+        "timeout": "before_release"
+      },
+      "apiChange": {
+        "action": "update_api_docs", 
+        "timeout": "24h"
+      }
+    },
+    "validationChecks": {
+      "preCommit": [
+        "markdownSyntax",
+        "linkValidation",
+        "exampleTesting",
+        "securityReview"
+      ],
+      "postUpdate": [
+        "crossReferences",
+        "indexUpdates",
+        "changelogEntries"
+      ]
+    }
+  },
+  "quickCommands": {
+    "development": [
+      "npm run dev",
+      "npm run claude:status", 
+      "npm run docs:validate"
+    ],
+    "documentation": [
+      "./claude-quick-start.sh",
+      "npm run docs:build",
+      "npm run docs:deploy"
+    ],
+    "validation": [
+      "npm run docs:lint",
+      "npm run docs:links",
+      "npm run docs:spell"
+    ]
+  },
+  "templates": {
+    "available": [
+      "feature-documentation",
+      "api-documentation", 
+      "user-guide",
+      "troubleshooting"
+    ],
+    "location": "/docs/templates/",
+    "usage": "mandatory"
+  },
+  "integrationPoints": {
+    "services": {
+      "frontend": "http://localhost:3000",
+      "backend": "http://localhost:5000",
+      "database": "PostgreSQL",
+      "storage": "Cloudflare R2",
+      "realtime": "Socket.IO",
+      "email": "SendGrid"
+    },
+    "repositories": {
+      "main": "/mnt/c/Users/Admin/source/repos/XP",
+      "documentation": "/docs",
+      "coordination": "/coordination"
+    }
+  },
+  "sessionInstructions": {
+    "onStart": [
+      "Load .claudecontext file",
+      "Read CLAUDE.md for detailed instructions",
+      "Check recent project changes",
+      "Review pending documentation tasks",
+      "Understand current development status"
+    ],
+    "beforeDocumenting": [
+      "Use CLAUDE_VALIDATION_CHECKLIST.md",
+      "Choose appropriate template",
+      "Test all code examples",
+      "Review security implications",
+      "Check for existing similar docs"
+    ],
+    "beforeCommitting": [
+      "Validate all changes",
+      "Update version numbers",
+      "Add changelog entries",
+      "Update cross-references",
+      "Use proper commit format"
+    ]
+  },
+  "emergencyProcedures": {
+    "contextLoss": {
+      "recovery": [
+        "Run ./claude-quick-start.sh",
+        "Read .claudecontext file",
+        "Load CLAUDE.md",
+        "Check memory/sessions/ for recent context"
+      ]
+    },
+    "documentationIssues": {
+      "escalation": [
+        "Mark document for human review",
+        "Add review_required status",
+        "Document specific concerns",
+        "Notify development team"
+      ]
+    }
+  }
+}

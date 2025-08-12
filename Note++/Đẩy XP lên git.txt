@@ -1,0 +1,58 @@
+ Để đẩy dữ liệu từ thư mục XP lên Git một cách an toàn, đây là các bước:
+
+  🔍 Bước 1: Tạo Repository trên GitHub trước
+
+  1. Đăng nhập vào GitHub.com
+  2. Click "New repository"
+  3. Đặt tên repo (ví dụ: "XP-project")
+  4. QUAN TRỌNG: Không tích "Initialize with README" để tránh conflict
+
+  📂 Bước 2: Chuẩn bị dữ liệu XP
+
+  Kiểm tra nội dung thư mục XP hiện tại:
+
+● List(.)
+  ⎿  Listed 326 paths (ctrl+r to expand)
+
+● 🚨 Bước 3: Tạo .gitignore trước
+
+  Để tránh đẩy những file không cần thiết:
+
+  # Dependencies
+  node_modules/
+  venv/
+
+  # Build outputs
+  dist/
+  build/
+  coverage/
+
+  # Environment files
+  .env
+  .env.local
+  *.log
+
+  # System files
+  .DS_Store
+  Thumbs.db
+
+  # IDE files
+  .vscode/
+  .idea/
+
+  # Test results
+  test-results/
+  playwright-report/
+
+  📋 Quy trình an toàn:
+
+  1. Tạo repo trên GitHub → Copy URL
+  2. Backup dữ liệu XP (copy sang thư mục khác)
+  3. Tạo .gitignore trong XP
+  4. Khởi tạo Git trong XP:
+  git init
+  git add .
+  git commit -m "Khởi tạo project XP"
+  git branch -M main
+  git remote add origin <URL-repo-GitHub>
+  git push -u origin main
